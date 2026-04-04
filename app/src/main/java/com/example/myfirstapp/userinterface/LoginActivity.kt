@@ -36,13 +36,21 @@ class LoginActivity : AppCompatActivity() {
             val user = db.login(email, password)
             if (user == null) {
                 Toast.makeText(this, "Invalid credentials", Toast.LENGTH_SHORT).show()
-            } else {
-                Session.userId = user.id
-                Session.role = user.role
-                Session.isBuyMode = (user.role != "SELLER") // default: buyers start in Buy Mode
+                return@setOnClickListener
+            }
+            if (user.isDisabled) {
+                Toast.makeText(this, "Account disabled. Contact admin.", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
 
+            Session.userId = user.id
+            Session.role = user.role
+            Session.isBuyMode = (user.role != "SELLER")
+
+            if (Session.isAdmin()) {
+                startActivity(Intent(this, AdminDashboardActivity::class.java))
+            } else {
                 startActivity(Intent(this, MainActivity::class.java))
-                finish()
             }
         }
 

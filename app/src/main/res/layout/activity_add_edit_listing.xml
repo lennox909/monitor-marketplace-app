@@ -1,64 +1,65 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:padding="20dp">
+    android:layout_height="match_parent">
 
     <LinearLayout
+        android:orientation="vertical"
+        android:padding="16dp"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:layout_height="wrap_content">
 
         <TextView
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Add / Edit Listing"
-            android:textStyle="bold"
-            android:textSize="22sp"
-            android:paddingBottom="12dp" />
+            android:textSize="18sp"
+            android:textStyle="bold"/>
 
-        <EditText
-            android:id="@+id/etTitle"
+        <EditText android:id="@+id/etTitle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Title" />
+            android:hint="Title"/>
 
-        <EditText
-            android:id="@+id/etDescription"
+        <EditText android:id="@+id/etDescription"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Description"
-            android:minLines="3"
-            android:gravity="top"
-            android:layout_marginTop="12dp" />
+            android:hint="Description"/>
 
-        <EditText
-            android:id="@+id/etCategory"
+        <EditText android:id="@+id/etCategory"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Category (e.g., Math, CS)"
-            android:layout_marginTop="12dp" />
+            android:hint="Category (Monitors, Accessories)"/>
 
-        <EditText
-            android:id="@+id/etPrice"
+        <EditText android:id="@+id/etPrice"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="Price"
-            android:inputType="numberDecimal"
-            android:layout_marginTop="12dp" />
+            android:inputType="numberDecimal"/>
 
-        <EditText
-            android:id="@+id/etCondition"
+        <EditText android:id="@+id/etCondition"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Condition (New / Used)"
-            android:layout_marginTop="12dp" />
+            android:hint="Condition (New/Used)"/>
+
+        <ImageView
+            android:id="@+id/ivPhoto"
+            android:layout_width="match_parent"
+            android:layout_height="200dp"
+            android:layout_marginTop="10dp"
+            android:scaleType="centerCrop"
+            android:src="@drawable/ic_image_placeholder"/>
 
         <Button
-            android:id="@+id/btnSave"
+            android:id="@+id/btnSelectPhoto"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Select Photo"/>
+
+        <Button android:id="@+id/btnSave"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Save"
-            android:layout_marginTop="16dp" />
+            android:layout_marginTop="10dp"/>
     </LinearLayout>
 </ScrollView>

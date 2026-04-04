@@ -1,16 +1,19 @@
 package com.example.myfirstapp.userinterface
 
+import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
 import android.widget.TextView
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.example.myfirstapp.R
 import com.example.myfirstapp.data.DatabaseHelper
 
 class CartActivity : AppCompatActivity() {
 
     private lateinit var db: DatabaseHelper
+    private lateinit var adapter: CartAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -18,30 +21,46 @@ class CartActivity : AppCompatActivity() {
 
         db = DatabaseHelper(this)
 
-        val tvSummary = findViewById<TextView>(R.id.tvCartSummary)
+        val rvCart = findViewById<RecyclerView>(R.id.rvCart)
+        val tvSubtotal = findViewById<TextView>(R.id.tvSubtotal)
+        val tvEmpty = findViewById<TextView>(R.id.tvEmptyCart)
         val btnCheckout = findViewById<Button>(R.id.btnCheckout)
 
-        val items = db.getCartItems(Session.userId)
-        if (items.isEmpty()) {
-            tvSummary.text = "Cart is empty"
-            btnCheckout.isEnabled = false
-            return
-        }
+        rvCart.layoutManager = LinearLayoutManager(this)
 
-        var total = 0.0
-        for (ci in items) {
-            val listing = db.getListingById(ci.listingId)
-            if (listing != null) {
-                total += listing.price * ci.quantity
+        adapter = CartAdapter(
+            items = mutableListOf(),
+            onQtyChanged = { row, newQty ->
+                db.updateCartItemQuantity(row.cartItemId, newQty)
+                refresh(tvSubtotal, tvEmpty, btnCheckout)
+            },
+            onRemove = { row ->
+                db.removeCartItem(row.cartItemId)
+                refresh(tvSubtotal, tvEmpty, btnCheckout)
             }
-        }
-
-        tvSummary.text = "Items: ${items.size}\nSubtotal: $${"%.2f".format(total)}"
+        )
+        rvCart.adapter = adapter
 
         btnCheckout.setOnClickListener {
-            db.clearCart(Session.userId)
-            Toast.makeText(this, "Order placed (mock)!", Toast.LENGTH_SHORT).show()
-            finish()
+            startActivity(Intent(this, CheckoutActivity::class.java))
         }
+
+        refresh(tvSubtotal, tvEmpty, btnCheckout)
+    }
+
+    private fun refresh(tvSubtotal: TextView, tvEmpty: TextView, btnCheckout: Button) {
+        val cartItems = db.getCartItems(Session.userId)
+
+        val rows = cartItems.mapNotNull { ci ->
+            val l = db.getListingById(ci.listingId) ?: return@mapNotNull null
+            CartRow(ci.id, l.id, l.title, l.price, ci.quantity)
+        }
+
+        adapter.setData(rows)
+
+        val subtotal = rows.sumOf { it.price * it.qty }
+        tvSubtotal.text = "Subtotal: $${"%.2f".format(subtotal)}"
+        btnCheckout.isEnabled = rows.isNotEmpty()
+        tvEmpty.visibility = if (rows.isEmpty()) android.view.View.VISIBLE else android.view.View.GONE
     }
 }

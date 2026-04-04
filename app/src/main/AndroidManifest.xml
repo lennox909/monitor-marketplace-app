@@ -7,13 +7,18 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.MyFirstApp">
 
+        <activity android:name=".userinterface.AdminDashboardActivity" />
+        <activity android:name=".userinterface.SettingsActivity" />
+        <activity android:name=".userinterface.ProfileActivity" />
+        <activity android:name=".userinterface.OrderConfirmationActivity" />
+        <activity android:name=".userinterface.CheckoutActivity" />
+
         <activity android:name=".userinterface.CartActivity" />
         <activity android:name=".userinterface.ListingDetailActivity" />
         <activity android:name=".userinterface.AddEditListingActivity" />
         <activity android:name=".userinterface.MainActivity" />
         <activity android:name=".userinterface.RegisterActivity" />
 
-        <!-- Launcher -->
         <activity
             android:name=".userinterface.LoginActivity"
             android:exported="true">
@@ -24,5 +29,4 @@
         </activity>
 
     </application>
-
 </manifest>
