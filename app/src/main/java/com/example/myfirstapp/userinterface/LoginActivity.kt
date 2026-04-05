@@ -26,32 +26,35 @@ class LoginActivity : AppCompatActivity() {
 
         btnLogin.setOnClickListener {
             val email = etEmail.text.toString().trim()
-            val password = etPassword.text.toString()
+            val password = etPassword.text.toString().trim()
 
             if (email.isEmpty() || password.isEmpty()) {
-                Toast.makeText(this, "Email and password required", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Enter email and password", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
 
             val user = db.login(email, password)
+
             if (user == null) {
-                Toast.makeText(this, "Invalid credentials", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Invalid email or password", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
+
             if (user.isDisabled) {
-                Toast.makeText(this, "Account disabled. Contact admin.", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Your account is disabled", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
 
             Session.userId = user.id
             Session.role = user.role
-            Session.isBuyMode = (user.role != "SELLER")
+            Session.isBuyMode = user.role == "BUYER"
 
-            if (Session.isAdmin()) {
+            if (user.role == "ADMIN") {
                 startActivity(Intent(this, AdminDashboardActivity::class.java))
             } else {
                 startActivity(Intent(this, MainActivity::class.java))
             }
+            finish()
         }
 
         btnGoRegister.setOnClickListener {

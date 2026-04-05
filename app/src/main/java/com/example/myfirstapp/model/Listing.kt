@@ -5,10 +5,16 @@ data class Listing(
     val sellerId: Long,
     val title: String,
     val description: String,
-    val category: String,
     val price: Double,
-    val condition: String,
-    val photoUri: String?,        // keep simple for A6
+    val category: String,
+    val brand: String = "",
+    val size: String = "",
+    val resolution: String = "",
+    val refreshRate: String = "",
+    val courseTag: String = "",
+    val condition: String = "",
+    val expirationDate: String,
+    val photoUri: String?,
     val status: String = "ACTIVE",
     val createdAt: Long = System.currentTimeMillis()
 )

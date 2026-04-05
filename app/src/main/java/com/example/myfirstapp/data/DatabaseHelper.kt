@@ -13,7 +13,7 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DB_NAME, null
 
     companion object {
         private const val DB_NAME = "MarketplaceDatabase.db"
-        private const val DB_VERSION = 2
+        private const val DB_VERSION = 4
 
         private const val T_USERS = "users"
         private const val T_LISTINGS = "listings"
@@ -34,9 +34,9 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DB_NAME, null
         private const val L_SELLER_ID = "sellerId"
         private const val L_TITLE = "title"
         private const val L_DESC = "description"
-        private const val L_CATEGORY = "category"
         private const val L_PRICE = "price"
-        private const val L_CONDITION = "condition"
+        private const val L_CATEGORY = "category"
+        private const val L_EXPIRATION = "expirationDate"
         private const val L_PHOTO_URI = "photoUri"
         private const val L_STATUS = "status"
         private const val L_CREATED_AT = "createdAt"
@@ -54,7 +54,7 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DB_NAME, null
         private const val O_STATUS = "status"
         private const val O_CREATED_AT = "createdAt"
 
-        // order_items
+        // order items
         private const val OI_ORDER_ID = "orderId"
         private const val OI_LISTING_ID = "listingId"
         private const val OI_TITLE = "title"
@@ -83,9 +83,9 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DB_NAME, null
                 $L_SELLER_ID INTEGER NOT NULL,
                 $L_TITLE TEXT NOT NULL,
                 $L_DESC TEXT NOT NULL,
-                $L_CATEGORY TEXT NOT NULL,
                 $L_PRICE REAL NOT NULL,
-                $L_CONDITION TEXT NOT NULL,
+                $L_CATEGORY TEXT NOT NULL,
+                $L_EXPIRATION TEXT NOT NULL,
                 $L_PHOTO_URI TEXT,
                 $L_STATUS TEXT NOT NULL,
                 $L_CREATED_AT INTEGER NOT NULL,
@@ -136,16 +136,14 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DB_NAME, null
             """.trimIndent()
         )
 
-        // Optional: create a default Admin account for testing
-        // email: admin@admin.com  pass: admin  role: ADMIN
-        val cv = ContentValues().apply {
+        val adminCv = ContentValues().apply {
             put(U_NAME, "Admin")
             put(U_EMAIL, "admin@admin.com")
             put(U_PASSWORD, "admin")
             put(U_ROLE, "ADMIN")
             put(U_DISABLED, 0)
         }
-        db.insert(T_USERS, null, cv)
+        db.insert(T_USERS, null, adminCv)
     }
 
     override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
@@ -172,7 +170,15 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DB_NAME, null
 
     fun getUserByEmail(email: String): User? {
         val db = readableDatabase
-        val cursor = db.query(T_USERS, null, "$U_EMAIL=?", arrayOf(email.lowercase()), null, null, null)
+        val cursor = db.query(
+            T_USERS,
+            null,
+            "$U_EMAIL=?",
+            arrayOf(email.lowercase()),
+            null,
+            null,
+            null
+        )
         cursor.use {
             if (!it.moveToFirst()) return null
             return cursorToUser(it)
@@ -186,7 +192,9 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DB_NAME, null
             null,
             "$U_EMAIL=? AND $U_PASSWORD=?",
             arrayOf(email.lowercase(), password),
-            null, null, null
+            null,
+            null,
+            null
         )
         cursor.use {
             if (!it.moveToFirst()) return null
@@ -196,8 +204,8 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DB_NAME, null
 
     fun getAllUsers(): List<User> {
         val db = readableDatabase
-        val c = db.query(T_USERS, null, null, null, null, null, "$COL_ID DESC")
-        return c.use {
+        val cursor = db.query(T_USERS, null, null, null, null, null, "$COL_ID DESC")
+        return cursor.use {
             val out = mutableListOf<User>()
             while (it.moveToNext()) out.add(cursorToUser(it))
             out
@@ -206,7 +214,9 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DB_NAME, null
 
     fun setUserDisabled(userId: Long, disabled: Boolean): Int {
         val db = writableDatabase
-        val cv = ContentValues().apply { put(U_DISABLED, if (disabled) 1 else 0) }
+        val cv = ContentValues().apply {
+            put(U_DISABLED, if (disabled) 1 else 0)
+        }
         return db.update(T_USERS, cv, "$COL_ID=?", arrayOf(userId.toString()))
     }
 
@@ -228,9 +238,9 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DB_NAME, null
             put(L_SELLER_ID, listing.sellerId)
             put(L_TITLE, listing.title)
             put(L_DESC, listing.description)
-            put(L_CATEGORY, listing.category)
             put(L_PRICE, listing.price)
-            put(L_CONDITION, listing.condition)
+            put(L_CATEGORY, listing.category)
+            put(L_EXPIRATION, listing.expirationDate)
             put(L_PHOTO_URI, listing.photoUri)
             put(L_STATUS, listing.status)
             put(L_CREATED_AT, listing.createdAt)
@@ -241,18 +251,24 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DB_NAME, null
     fun getAllListingsGlobal(): List<Listing> {
         val db = readableDatabase
         val cursor = db.query(
-            T_LISTINGS, null,
+            T_LISTINGS,
+            null,
             "$L_STATUS=?",
             arrayOf("ACTIVE"),
-            null, null,
+            null,
+            null,
             "$L_CREATED_AT DESC"
         )
         return cursor.use { toListings(it) }
     }
 
-    fun searchListings(keyword: String?, category: String?, minPrice: Double?, maxPrice: Double?): List<Listing> {
+    fun searchListings(
+        keyword: String?,
+        category: String?,
+        minPrice: Double?,
+        maxPrice: Double?
+    ): List<Listing> {
         val db = readableDatabase
-
         val where = mutableListOf<String>()
         val args = mutableListOf<String>()
 
@@ -264,24 +280,29 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DB_NAME, null
             args.add("%$keyword%")
             args.add("%$keyword%")
         }
+
         if (!category.isNullOrBlank() && category != "All") {
             where.add("$L_CATEGORY=?")
             args.add(category)
         }
+
         if (minPrice != null) {
             where.add("$L_PRICE>=?")
             args.add(minPrice.toString())
         }
+
         if (maxPrice != null) {
             where.add("$L_PRICE<=?")
             args.add(maxPrice.toString())
         }
 
         val cursor = db.query(
-            T_LISTINGS, null,
+            T_LISTINGS,
+            null,
             where.joinToString(" AND "),
             args.toTypedArray(),
-            null, null,
+            null,
+            null,
             "$L_CREATED_AT DESC"
         )
         return cursor.use { toListings(it) }
@@ -290,10 +311,12 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DB_NAME, null
     fun getListingsBySeller(sellerId: Long): List<Listing> {
         val db = readableDatabase
         val cursor = db.query(
-            T_LISTINGS, null,
+            T_LISTINGS,
+            null,
             "$L_SELLER_ID=?",
             arrayOf(sellerId.toString()),
-            null, null,
+            null,
+            null,
             "$L_CREATED_AT DESC"
         )
         return cursor.use { toListings(it) }
@@ -301,7 +324,15 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DB_NAME, null
 
     fun getListingById(listingId: Long): Listing? {
         val db = readableDatabase
-        val cursor = db.query(T_LISTINGS, null, "$COL_ID=?", arrayOf(listingId.toString()), null, null, null)
+        val cursor = db.query(
+            T_LISTINGS,
+            null,
+            "$COL_ID=?",
+            arrayOf(listingId.toString()),
+            null,
+            null,
+            null
+        )
         cursor.use {
             if (!it.moveToFirst()) return null
             return cursorToListing(it)
@@ -313,9 +344,9 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DB_NAME, null
         val cv = ContentValues().apply {
             put(L_TITLE, listing.title)
             put(L_DESC, listing.description)
-            put(L_CATEGORY, listing.category)
             put(L_PRICE, listing.price)
-            put(L_CONDITION, listing.condition)
+            put(L_CATEGORY, listing.category)
+            put(L_EXPIRATION, listing.expirationDate)
             put(L_PHOTO_URI, listing.photoUri)
             put(L_STATUS, listing.status)
         }
@@ -324,7 +355,9 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DB_NAME, null
 
     fun setListingStatus(listingId: Long, status: String): Int {
         val db = writableDatabase
-        val cv = ContentValues().apply { put(L_STATUS, status) }
+        val cv = ContentValues().apply {
+            put(L_STATUS, status)
+        }
         return db.update(T_LISTINGS, cv, "$COL_ID=?", arrayOf(listingId.toString()))
     }
 
@@ -335,7 +368,9 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DB_NAME, null
 
     private fun toListings(cursor: Cursor): List<Listing> {
         val out = mutableListOf<Listing>()
-        while (cursor.moveToNext()) out.add(cursorToListing(cursor))
+        while (cursor.moveToNext()) {
+            out.add(cursorToListing(cursor))
+        }
         return out
     }
 
@@ -345,9 +380,9 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DB_NAME, null
             sellerId = c.getLong(c.getColumnIndexOrThrow(L_SELLER_ID)),
             title = c.getString(c.getColumnIndexOrThrow(L_TITLE)),
             description = c.getString(c.getColumnIndexOrThrow(L_DESC)),
-            category = c.getString(c.getColumnIndexOrThrow(L_CATEGORY)),
             price = c.getDouble(c.getColumnIndexOrThrow(L_PRICE)),
-            condition = c.getString(c.getColumnIndexOrThrow(L_CONDITION)),
+            category = c.getString(c.getColumnIndexOrThrow(L_CATEGORY)),
+            expirationDate = c.getString(c.getColumnIndexOrThrow(L_EXPIRATION)),
             photoUri = c.getString(c.getColumnIndexOrThrow(L_PHOTO_URI)),
             status = c.getString(c.getColumnIndexOrThrow(L_STATUS)),
             createdAt = c.getLong(c.getColumnIndexOrThrow(L_CREATED_AT))
@@ -373,7 +408,15 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DB_NAME, null
 
     fun getCartItems(userId: Long): List<CartItem> {
         val db = readableDatabase
-        val cursor = db.query(T_CART, null, "$C_USER_ID=?", arrayOf(userId.toString()), null, null, null)
+        val cursor = db.query(
+            T_CART,
+            null,
+            "$C_USER_ID=?",
+            arrayOf(userId.toString()),
+            null,
+            null,
+            null
+        )
         return cursor.use {
             val out = mutableListOf<CartItem>()
             while (it.moveToNext()) {
@@ -393,7 +436,9 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DB_NAME, null
     fun updateCartItemQuantity(cartItemId: Long, newQty: Int): Int {
         if (newQty <= 0) return removeCartItem(cartItemId)
         val db = writableDatabase
-        val cv = ContentValues().apply { put(C_QTY, newQty) }
+        val cv = ContentValues().apply {
+            put(C_QTY, newQty)
+        }
         return db.update(T_CART, cv, "$COL_ID=?", arrayOf(cartItemId.toString()))
     }
 
@@ -410,10 +455,13 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DB_NAME, null
     private fun getCartItem(userId: Long, listingId: Long): CartItem? {
         val db = readableDatabase
         val cursor = db.query(
-            T_CART, null,
+            T_CART,
+            null,
             "$C_USER_ID=? AND $C_LISTING_ID=?",
             arrayOf(userId.toString(), listingId.toString()),
-            null, null, null
+            null,
+            null,
+            null
         )
         cursor.use {
             if (!it.moveToFirst()) return null
@@ -436,15 +484,16 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DB_NAME, null
         val cart = getCartItems(buyerId)
         if (cart.isEmpty()) return -1L
 
-        // compute total + ensure listings are ACTIVE
         var total = 0.0
         val listings = mutableListOf<Pair<CartItem, Listing>>()
+
         for (ci in cart) {
-            val l = getListingById(ci.listingId) ?: continue
-            if (l.status != "ACTIVE") continue
-            total += l.price * ci.quantity
-            listings.add(ci to l)
+            val listing = getListingById(ci.listingId) ?: continue
+            if (listing.status != "ACTIVE") continue
+            total += listing.price * ci.quantity
+            listings.add(ci to listing)
         }
+
         if (listings.isEmpty()) return -1L
 
         var orderId = -1L
@@ -458,31 +507,32 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DB_NAME, null
                 put(O_STATUS, "PLACED")
                 put(O_CREATED_AT, System.currentTimeMillis())
             }
+
             orderId = db.insert(T_ORDERS, null, orderCv)
             if (orderId <= 0) throw IllegalStateException("Order insert failed")
 
-            for ((ci, l) in listings) {
+            for ((ci, listing) in listings) {
                 val itemCv = ContentValues().apply {
                     put(OI_ORDER_ID, orderId)
-                    put(OI_LISTING_ID, l.id)
-                    put(OI_TITLE, l.title)
-                    put(OI_PRICE, l.price)
+                    put(OI_LISTING_ID, listing.id)
+                    put(OI_TITLE, listing.title)
+                    put(OI_PRICE, listing.price)
                     put(OI_QTY, ci.quantity)
                 }
                 db.insert(T_ORDER_ITEMS, null, itemCv)
 
-                // mark listing SOLD
-                val statusCv = ContentValues().apply { put(L_STATUS, "SOLD") }
-                db.update(T_LISTINGS, statusCv, "$COL_ID=?", arrayOf(l.id.toString()))
+                val soldCv = ContentValues().apply {
+                    put(L_STATUS, "SOLD")
+                }
+                db.update(T_LISTINGS, soldCv, "$COL_ID=?", arrayOf(listing.id.toString()))
             }
 
-            // clear cart
             db.delete(T_CART, "$C_USER_ID=?", arrayOf(buyerId.toString()))
-
             db.setTransactionSuccessful()
         } finally {
             db.endTransaction()
         }
+
         return orderId
     }
 }

@@ -2,9 +2,12 @@ package com.example.myfirstapp.userinterface
 
 import android.content.Intent
 import android.os.Bundle
+import android.view.View
+import android.widget.ArrayAdapter
 import android.widget.Button
-import android.widget.Switch
-import android.widget.Toast
+import android.widget.EditText
+import android.widget.Spinner
+import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -18,70 +21,90 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        if (Session.role == "ADMIN") {
+            startActivity(Intent(this, AdminDashboardActivity::class.java))
+            finish()
+            return
+        }
+
         setContentView(R.layout.activity_main)
 
         db = DatabaseHelper(this)
 
-        val switchMode = findViewById<Switch>(R.id.switchMode)
-        val btnAddListing = findViewById<Button>(R.id.btnAddListing)
-        val btnCart = findViewById<Button>(R.id.btnCart)
-        val btnLogout = findViewById<Button>(R.id.btnLogout)
-        val recycler = findViewById<RecyclerView>(R.id.rvListings)
+        val etSearch = findViewById<EditText>(R.id.etSearch)
+        val spCategory = findViewById<Spinner>(R.id.spCategory)
+        val btnSearch = findViewById<Button>(R.id.btnSearch)
+        val tvEmpty = findViewById<TextView>(R.id.tvEmpty)
+        val recyclerView = findViewById<RecyclerView>(R.id.recyclerView)
 
-        recycler.layoutManager = LinearLayoutManager(this)
-        adapter = ListingAdapter(emptyList()) { listingId ->
-            val i = Intent(this, ListingDetailActivity::class.java)
-            i.putExtra("LISTING_ID", listingId)
-            startActivity(i)
-        }
-        recycler.adapter = adapter
+        val categories = listOf("All", "Programming", "Design", "Office", "General")
+        spCategory.adapter = ArrayAdapter(
+            this,
+            android.R.layout.simple_spinner_dropdown_item,
+            categories
+        )
 
-        switchMode.isChecked = Session.isBuyMode
-        btnAddListing.isEnabled = !Session.isBuyMode
-        btnCart.isEnabled = Session.isBuyMode
+        recyclerView.layoutManager = LinearLayoutManager(this)
+        adapter = ListingAdapter(emptyList())
+        recyclerView.adapter = adapter
 
-        switchMode.setOnCheckedChangeListener { _, isChecked ->
-            Session.isBuyMode = isChecked
-            btnAddListing.isEnabled = !Session.isBuyMode
-            btnCart.isEnabled = Session.isBuyMode
-            refreshListings()
-        }
+        fun loadAllListings() {
+            val listings =
+                if (Session.role == "SELLER") {
+                    db.getListingsBySeller(Session.userId)
+                } else {
+                    db.getAllListingsGlobal()
+                }
 
-        btnAddListing.setOnClickListener {
-            if (Session.isBuyMode) {
-                Toast.makeText(this, "Switch to Sell Mode to add listings", Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
-            }
-            startActivity(Intent(this, AddEditListingActivity::class.java))
+            adapter.updateData(listings)
+            tvEmpty.visibility = if (listings.isEmpty()) View.VISIBLE else View.GONE
         }
 
-        btnCart.setOnClickListener {
-            if (!Session.isBuyMode) {
-                Toast.makeText(this, "Switch to Buy Mode to view cart", Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
-            }
-            startActivity(Intent(this, CartActivity::class.java))
+        btnSearch.setOnClickListener {
+            val keyword = etSearch.text.toString().trim()
+            val selectedCategory = spCategory.selectedItem.toString()
+
+            val listings =
+                if (Session.role == "SELLER") {
+                    db.getListingsBySeller(Session.userId).filter { listing ->
+                        val keywordMatch =
+                            keyword.isBlank() ||
+                                    listing.title.contains(keyword, ignoreCase = true) ||
+                                    listing.description.contains(keyword, ignoreCase = true)
+
+                        val categoryMatch =
+                            selectedCategory == "All" ||
+                                    listing.category.equals(selectedCategory, ignoreCase = true)
+
+                        keywordMatch && categoryMatch
+                    }
+                } else {
+                    db.searchListings(
+                        keyword = if (keyword.isBlank()) null else keyword,
+                        category = if (selectedCategory == "All") null else selectedCategory,
+                        minPrice = null,
+                        maxPrice = null
+                    )
+                }
+
+            adapter.updateData(listings)
+            tvEmpty.visibility = if (listings.isEmpty()) View.VISIBLE else View.GONE
         }
 
-        btnLogout.setOnClickListener {
-            Session.userId = -1
-            Session.role = "BUYER"
-            Session.isBuyMode = true
-            startActivity(Intent(this, LoginActivity::class.java))
-            finish()
-        }
+        loadAllListings()
     }
 
     override fun onResume() {
         super.onResume()
-        refreshListings()
-    }
-
-    private fun refreshListings() {
-        val listings =
-            if (Session.isBuyMode) db.getAllListingsGlobal()
-            else db.getListingsBySeller(Session.userId)
-
-        adapter.updateData(listings)
+        if (::db.isInitialized && ::adapter.isInitialized) {
+            val listings =
+                if (Session.role == "SELLER") {
+                    db.getListingsBySeller(Session.userId)
+                } else {
+                    db.getAllListingsGlobal()
+                }
+            adapter.updateData(listings)
+        }
     }
 }

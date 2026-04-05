@@ -1,118 +1,58 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
-    android:padding="12dp"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp"
+    android:background="#F5F7FB">
 
-    <LinearLayout
-        android:layout_width="match_parent"
+    <TextView
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:orientation="horizontal">
-
-        <TextView
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            android:layout_height="wrap_content"
-            android:text="Marketplace"
-            android:textSize="18sp"
-            android:textStyle="bold"/>
-
-        <Switch
-            android:id="@+id/switchMode"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Buy"/>
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:layout_marginTop="8dp">
-
-        <Button
-            android:id="@+id/btnAddListing"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="Add Listing" />
-
-        <Button
-            android:id="@+id/btnCart"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="Cart" />
-
-        <Button
-            android:id="@+id/btnProfile"
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            android:layout_height="wrap_content"
-            android:text="Profile"/>
-
-        <Button
-            android:id="@+id/btnLogout"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Logout"/>
-    </LinearLayout>
+        android:text="Monitor Marketplace"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        android:textColor="#1F2A44" />
 
     <EditText
         android:id="@+id/etSearch"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Search monitors..."
-        android:layout_marginTop="10dp"/>
+        android:hint="Search listings..."
+        android:layout_marginTop="12dp" />
 
-    <LinearLayout
+    <Spinner
+        android:id="@+id/spCategory"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:layout_marginTop="8dp">
+        android:layout_marginTop="10dp" />
 
-        <Spinner
-            android:id="@+id/spCategory"
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            android:layout_height="wrap_content"/>
-
-        <EditText
-            android:id="@+id/etMinPrice"
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            android:layout_height="wrap_content"
-            android:hint="Min"
-            android:inputType="numberDecimal"/>
-
-        <EditText
-            android:id="@+id/etMaxPrice"
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            android:layout_height="wrap_content"
-            android:hint="Max"
-            android:inputType="numberDecimal"/>
-
-        <Button
-            android:id="@+id/btnApplyFilters"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Go"/>
-    </LinearLayout>
+    <Button
+        android:id="@+id/btnSearch"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Apply Search / Filter"
+        android:textAllCaps="false"
+        android:textStyle="bold"
+        android:backgroundTint="#F97316"
+        android:textColor="#FFFFFF"
+        android:layout_marginTop="12dp" />
 
     <TextView
         android:id="@+id/tvEmpty"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="No listings found."
+        android:text="No matching listings found"
+        android:textColor="#6B7280"
+        android:textSize="14sp"
         android:visibility="gone"
-        android:layout_marginTop="10dp"/>
+        android:layout_marginTop="12dp" />
 
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rvListings"
+        android:id="@+id/recyclerView"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:layout_marginTop="8dp"/>
+        android:layout_marginTop="12dp" />
+
 </LinearLayout>

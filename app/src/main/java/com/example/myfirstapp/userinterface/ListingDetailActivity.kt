@@ -1,11 +1,8 @@
 package com.example.myfirstapp.userinterface
 
 import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
-import android.view.View
 import android.widget.Button
-import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -24,16 +21,21 @@ class ListingDetailActivity : AppCompatActivity() {
         db = DatabaseHelper(this)
         listingId = intent.getLongExtra("LISTING_ID", -1)
 
-        val ivPhoto = findViewById<ImageView>(R.id.ivPhoto)
         val tvTitle = findViewById<TextView>(R.id.tvTitle)
         val tvPrice = findViewById<TextView>(R.id.tvPrice)
-        val tvMeta = findViewById<TextView>(R.id.tvMeta)
+        val tvBrand = findViewById<TextView>(R.id.tvBrand)
+        val tvSize = findViewById<TextView>(R.id.tvSize)
+        val tvResolution = findViewById<TextView>(R.id.tvResolution)
+        val tvRefreshRate = findViewById<TextView>(R.id.tvRefreshRate)
+        val tvCourseTag = findViewById<TextView>(R.id.tvCourseTag)
+        val tvCategory = findViewById<TextView>(R.id.tvCategory)
+        val tvCondition = findViewById<TextView>(R.id.tvCondition)
         val tvDescription = findViewById<TextView>(R.id.tvDescription)
-        val tvStatus = findViewById<TextView>(R.id.tvStatus)
         val btnPrimary = findViewById<Button>(R.id.btnPrimary)
         val btnSecondary = findViewById<Button>(R.id.btnSecondary)
 
         val listing = db.getListingById(listingId)
+
         if (listing == null) {
             Toast.makeText(this, "Listing not found", Toast.LENGTH_SHORT).show()
             finish()
@@ -42,58 +44,52 @@ class ListingDetailActivity : AppCompatActivity() {
 
         tvTitle.text = listing.title
         tvPrice.text = "$${"%.2f".format(listing.price)}"
-        tvMeta.text = "${listing.category} • ${listing.condition}"
+        tvBrand.text = "Brand: ${listing.brand}"
+        tvSize.text = "Size: ${listing.size}"
+        tvResolution.text = "Resolution: ${listing.resolution}"
+        tvRefreshRate.text = "Refresh Rate: ${listing.refreshRate}"
+        tvCourseTag.text = "Course Tag: ${listing.courseTag}"
+        tvCategory.text = "Category: ${listing.category}"
+        tvCondition.text = "Condition: ${listing.condition}"
         tvDescription.text = listing.description
-
-        if (!listing.photoUri.isNullOrBlank()) {
-            ivPhoto.setImageURI(Uri.parse(listing.photoUri))
-        } else {
-            ivPhoto.setImageResource(R.drawable.ic_image_placeholder)
-        }
-
-        if (listing.status != "ACTIVE") {
-            tvStatus.visibility = View.VISIBLE
-            tvStatus.text = listing.status
-        } else {
-            tvStatus.visibility = View.GONE
-        }
 
         val isOwner = listing.sellerId == Session.userId
 
-        if (Session.isBuyMode) {
+        if (Session.role == "BUYER") {
             btnPrimary.text = "Add to Cart"
             btnSecondary.text = "Back"
 
-            if (listing.status != "ACTIVE") {
-                btnPrimary.isEnabled = false
-                btnPrimary.text = "Unavailable"
-            }
-
             btnPrimary.setOnClickListener {
-                db.addToCart(Session.userId, listingId, 1)
+                db.addToCart(Session.userId, listing.id, 1)
                 Toast.makeText(this, "Added to cart", Toast.LENGTH_SHORT).show()
             }
-            btnSecondary.setOnClickListener { finish() }
 
-        } else {
-            if (!isOwner) {
-                btnPrimary.visibility = View.GONE
-                btnSecondary.text = "Back"
-                btnSecondary.setOnClickListener { finish() }
-                return
+            btnSecondary.setOnClickListener {
+                finish()
             }
-
-            btnPrimary.text = "Edit"
-            btnSecondary.text = "Delete"
+        } else {
+            btnPrimary.text = "Edit Listing"
+            btnSecondary.text = "Delete Listing"
 
             btnPrimary.setOnClickListener {
-                val i = Intent(this, AddEditListingActivity::class.java)
-                i.putExtra("EDIT_ID", listingId)
-                startActivity(i)
+                if (!isOwner) {
+                    Toast.makeText(this, "You can only edit your own listing", Toast.LENGTH_SHORT).show()
+                    return@setOnClickListener
+                }
+
+                val intent = Intent(this, AddEditListingActivity::class.java)
+                intent.putExtra("EDIT_ID", listing.id)
+                startActivity(intent)
             }
+
             btnSecondary.setOnClickListener {
-                db.deleteListing(listingId)
-                Toast.makeText(this, "Deleted", Toast.LENGTH_SHORT).show()
+                if (!isOwner) {
+                    Toast.makeText(this, "You can only delete your own listing", Toast.LENGTH_SHORT).show()
+                    return@setOnClickListener
+                }
+
+                db.deleteListing(listing.id)
+                Toast.makeText(this, "Listing deleted", Toast.LENGTH_SHORT).show()
                 finish()
             }
         }
