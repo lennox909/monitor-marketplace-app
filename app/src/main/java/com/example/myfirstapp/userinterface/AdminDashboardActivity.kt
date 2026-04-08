@@ -2,11 +2,7 @@ package com.example.myfirstapp.userinterface
 
 import android.content.Intent
 import android.os.Bundle
-import android.widget.ArrayAdapter
-import android.widget.Button
-import android.widget.ListView
-import android.widget.TextView
-import android.widget.Toast
+import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import com.example.myfirstapp.R
 import com.example.myfirstapp.data.DatabaseHelper
@@ -21,19 +17,18 @@ class AdminDashboardActivity : AppCompatActivity() {
 
         db = DatabaseHelper(this)
 
-        val tvAdmin = findViewById<TextView>(R.id.tvAdmin)
-        val btnRefreshUsers = findViewById<Button>(R.id.btnRefreshUsers)
-        val lvUsers = findViewById<ListView>(R.id.lvUsers)
+        val tvAdmin        = findViewById<TextView>(R.id.tvAdmin)
+        val btnRefreshUsers= findViewById<Button>(R.id.btnRefreshUsers)
+        val lvUsers        = findViewById<ListView>(R.id.lvUsers)
         val btnAdminLogout = findViewById<Button>(R.id.btnAdminLogout)
 
         fun refreshUsers() {
             val users = db.getAllUsers()
-
-            tvAdmin.text = "Admin Dashboard (${users.size} users)"
+            tvAdmin.text = "Admin Dashboard — ${users.size} users"
 
             val displayList = users.map { user ->
-                val status = if (user.isDisabled) "DISABLED" else "ACTIVE"
-                "${user.name}\n${user.email} | ${user.role} | $status"
+                val status = if (user.disabled) "DISABLED" else "ACTIVE"
+                "${user.name}  |  ${user.role}  |  $status\n${user.email}"
             }
 
             lvUsers.adapter = ArrayAdapter(
@@ -46,33 +41,27 @@ class AdminDashboardActivity : AppCompatActivity() {
                 val user = users[position]
 
                 if (user.role == "ADMIN") {
-                    Toast.makeText(this, "Admin account cannot be disabled", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, "Cannot disable admin account", Toast.LENGTH_SHORT).show()
                     return@setOnItemClickListener
                 }
 
-                val newDisabledState = !user.isDisabled
-                db.setUserDisabled(user.id, newDisabledState)
-
-                val message = if (newDisabledState) {
-                    "${user.name} disabled"
-                } else {
-                    "${user.name} enabled"
-                }
-
-                Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
+                val newState = !user.disabled
+                db.setUserDisabled(user.id, newState)
+                Toast.makeText(
+                    this,
+                    if (newState) "${user.name} disabled" else "${user.name} enabled",
+                    Toast.LENGTH_SHORT
+                ).show()
                 refreshUsers()
             }
         }
 
-        btnRefreshUsers.setOnClickListener {
-            refreshUsers()
-        }
+        btnRefreshUsers.setOnClickListener { refreshUsers() }
 
         btnAdminLogout.setOnClickListener {
-            Session.userId = -1L
-            Session.role = "BUYER"
+            Session.userId    = -1L
+            Session.role      = "BUYER"
             Session.isBuyMode = true
-
             startActivity(Intent(this, LoginActivity::class.java))
             finish()
         }

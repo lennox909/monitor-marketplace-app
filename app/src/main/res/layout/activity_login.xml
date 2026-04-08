@@ -24,7 +24,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Login to continue"
+            android:text="Sign in to continue"
             android:textSize="15sp"
             android:textColor="#6B7280"
             android:layout_marginTop="8dp"
@@ -56,15 +56,15 @@
                     android:layout_height="wrap_content"
                     android:hint="Enter your email"
                     android:inputType="textEmailAddress"
-                    android:layout_marginTop="6dp" />
+                    android:layout_marginTop="6dp"
+                    android:layout_marginBottom="14dp" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Password"
                     android:textStyle="bold"
-                    android:textColor="#374151"
-                    android:layout_marginTop="14dp" />
+                    android:textColor="#374151" />
 
                 <EditText
                     android:id="@+id/etPassword"
@@ -102,7 +102,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Admin: admin@admin.com / admin"
+            android:text="Admin: admin@mavs.uta.edu / admin123"
             android:textSize="12sp"
             android:textColor="#6B7280"
             android:layout_marginTop="16dp" />

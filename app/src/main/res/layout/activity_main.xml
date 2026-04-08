@@ -6,53 +6,112 @@
     android:padding="16dp"
     android:background="#F5F7FB">
 
-    <TextView
-        android:layout_width="wrap_content"
+    <!-- Header row -->
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Monitor Marketplace"
-        android:textSize="24sp"
-        android:textStyle="bold"
-        android:textColor="#1F2A44" />
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:layout_marginBottom="12dp">
 
+        <TextView
+            android:id="@+id/tvWelcome"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Monitor Marketplace"
+            android:textSize="22sp"
+            android:textStyle="bold"
+            android:textColor="#1F2A44" />
+
+        <Button
+            android:id="@+id/btnLogout"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Logout"
+            android:textAllCaps="false"
+            android:textColor="#1F2A44"
+            android:backgroundTint="#E5E7EB" />
+
+    </LinearLayout>
+
+    <!-- Seller: Add Listing button -->
+    <Button
+        android:id="@+id/btnAddListing"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="+ Add New Listing"
+        android:textAllCaps="false"
+        android:textStyle="bold"
+        android:textColor="#FFFFFF"
+        android:backgroundTint="#F97316"
+        android:visibility="gone"
+        android:layout_marginBottom="10dp" />
+
+    <!-- Buyer: Cart button -->
+    <Button
+        android:id="@+id/btnCart"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="View Cart"
+        android:textAllCaps="false"
+        android:textStyle="bold"
+        android:textColor="#FFFFFF"
+        android:backgroundTint="#F97316"
+        android:visibility="gone"
+        android:layout_marginBottom="10dp" />
+
+    <!-- Search bar (buyer only - hidden for sellers) -->
     <EditText
         android:id="@+id/etSearch"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Search listings..."
-        android:layout_marginTop="12dp" />
+        android:hint="Search by title or brand..."
+        android:inputType="text"
+        android:layout_marginBottom="8dp" />
 
+    <!-- Condition filter (buyer only - hidden for sellers) -->
     <Spinner
         android:id="@+id/spCategory"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="10dp" />
+        android:layout_marginBottom="8dp" />
 
+    <!-- Apply filter button (buyer only - hidden for sellers) -->
     <Button
         android:id="@+id/btnSearch"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Apply Search / Filter"
+        android:text="Apply Filter"
         android:textAllCaps="false"
         android:textStyle="bold"
-        android:backgroundTint="#F97316"
+        android:backgroundTint="#1F2A44"
         android:textColor="#FFFFFF"
-        android:layout_marginTop="12dp" />
+        android:layout_marginBottom="8dp" />
 
+    <!-- Invisible anchor view used as searchBar group reference -->
+    <View
+        android:id="@+id/searchBar"
+        android:layout_width="match_parent"
+        android:layout_height="0dp" />
+
+    <!-- Empty state -->
     <TextView
         android:id="@+id/tvEmpty"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="No matching listings found"
+        android:text="No listings yet. Tap above to add one."
         android:textColor="#6B7280"
         android:textSize="14sp"
+        android:gravity="center"
         android:visibility="gone"
-        android:layout_marginTop="12dp" />
+        android:layout_marginTop="40dp" />
 
+    <!-- Listings -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerView"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1"
-        android:layout_marginTop="12dp" />
+        android:layout_weight="1" />
 
 </LinearLayout>

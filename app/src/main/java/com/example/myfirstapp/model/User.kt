@@ -5,6 +5,6 @@ data class User(
     val name: String,
     val email: String,
     val password: String,
-    val role: String, // BUYER, SELLER, ADMIN
-    val isDisabled: Boolean = false
+    val role: String,           // BUYER, SELLER, ADMIN
+    val disabled: Boolean = false
 )

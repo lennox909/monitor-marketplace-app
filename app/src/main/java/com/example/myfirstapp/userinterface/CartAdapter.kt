@@ -23,12 +23,12 @@ class CartAdapter(
 ) : RecyclerView.Adapter<CartAdapter.VH>() {
 
     class VH(v: View) : RecyclerView.ViewHolder(v) {
-        val tvTitle: TextView = v.findViewById(R.id.tvItemTitle)
-        val tvPrice: TextView = v.findViewById(R.id.tvItemPrice)
-        val tvQty: TextView = v.findViewById(R.id.tvQty)
-        val btnMinus: Button = v.findViewById(R.id.btnMinus)
-        val btnPlus: Button = v.findViewById(R.id.btnPlus)
-        val btnRemove: Button = v.findViewById(R.id.btnRemove)
+        val tvTitle : TextView = v.findViewById(R.id.tvItemTitle)
+        val tvPrice : TextView = v.findViewById(R.id.tvItemPrice)
+        val tvQty   : TextView = v.findViewById(R.id.tvQty)
+        val btnMinus: Button   = v.findViewById(R.id.btnMinus)
+        val btnPlus : Button   = v.findViewById(R.id.btnPlus)
+        val btnRemove: Button  = v.findViewById(R.id.btnRemove)
     }
 
     fun setData(newItems: List<CartRow>) {
@@ -37,20 +37,21 @@ class CartAdapter(
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VH {
-        val v = LayoutInflater.from(parent.context).inflate(R.layout.item_cart, parent, false)
+        val v = LayoutInflater.from(parent.context)
+            .inflate(R.layout.item_cart, parent, false)
         return VH(v)
     }
 
     override fun onBindViewHolder(h: VH, position: Int) {
         val row = items[position]
         h.tvTitle.text = row.title
-        h.tvPrice.text = "$${"%.2f".format(row.price)}"
-        h.tvQty.text = row.qty.toString()
+        h.tvPrice.text = "$${String.format("%.2f", row.price)}"
+        h.tvQty.text   = row.qty.toString()
 
-        h.btnMinus.setOnClickListener { onQtyChanged(row, row.qty - 1) }
-        h.btnPlus.setOnClickListener { onQtyChanged(row, row.qty + 1) }
+        h.btnMinus.setOnClickListener  { onQtyChanged(row, row.qty - 1) }
+        h.btnPlus.setOnClickListener   { onQtyChanged(row, row.qty + 1) }
         h.btnRemove.setOnClickListener { onRemove(row) }
     }
 
-    override fun getItemCount(): Int = items.size
+    override fun getItemCount() = items.size
 }

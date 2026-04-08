@@ -16,17 +16,14 @@
         android:paddingBottom="24dp">
 
         <TextView
-            android:id="@+id/tvTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Create your account"
             android:textSize="30sp"
             android:textStyle="bold"
-            android:textColor="#18243D"
-            android:letterSpacing="0.01" />
+            android:textColor="#18243D" />
 
         <TextView
-            android:id="@+id/tvSubtitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Register using your UTA student email"
@@ -62,9 +59,8 @@
                     android:layout_height="wrap_content"
                     android:hint="Enter your full name"
                     android:inputType="textPersonName"
-                    android:paddingTop="12dp"
-                    android:paddingBottom="12dp"
-                    android:layout_marginTop="6dp" />
+                    android:layout_marginTop="6dp"
+                    android:layout_marginBottom="16dp" />
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -72,8 +68,7 @@
                     android:text="UTA Email"
                     android:textSize="14sp"
                     android:textStyle="bold"
-                    android:textColor="#374151"
-                    android:layout_marginTop="16dp" />
+                    android:textColor="#374151" />
 
                 <EditText
                     android:id="@+id/etEmail"
@@ -81,9 +76,8 @@
                     android:layout_height="wrap_content"
                     android:hint="example@mavs.uta.edu"
                     android:inputType="textEmailAddress"
-                    android:paddingTop="12dp"
-                    android:paddingBottom="12dp"
-                    android:layout_marginTop="6dp" />
+                    android:layout_marginTop="6dp"
+                    android:layout_marginBottom="16dp" />
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -91,18 +85,16 @@
                     android:text="Password"
                     android:textSize="14sp"
                     android:textStyle="bold"
-                    android:textColor="#374151"
-                    android:layout_marginTop="16dp" />
+                    android:textColor="#374151" />
 
                 <EditText
                     android:id="@+id/etPassword"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="8+ chars, uppercase, number, special"
+                    android:hint="Minimum 6 characters"
                     android:inputType="textPassword"
-                    android:paddingTop="12dp"
-                    android:paddingBottom="12dp"
-                    android:layout_marginTop="6dp" />
+                    android:layout_marginTop="6dp"
+                    android:layout_marginBottom="16dp" />
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -110,8 +102,7 @@
                     android:text="Confirm Password"
                     android:textSize="14sp"
                     android:textStyle="bold"
-                    android:textColor="#374151"
-                    android:layout_marginTop="16dp" />
+                    android:textColor="#374151" />
 
                 <EditText
                     android:id="@+id/etConfirmPassword"
@@ -119,17 +110,8 @@
                     android:layout_height="wrap_content"
                     android:hint="Re-enter password"
                     android:inputType="textPassword"
-                    android:paddingTop="12dp"
-                    android:paddingBottom="12dp"
-                    android:layout_marginTop="6dp" />
-
-                <TextView
-                    android:id="@+id/tvPasswordMatch"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text=""
-                    android:textSize="13sp"
-                    android:layout_marginTop="6dp" />
+                    android:layout_marginTop="6dp"
+                    android:layout_marginBottom="16dp" />
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -137,14 +119,14 @@
                     android:text="Role"
                     android:textSize="14sp"
                     android:textStyle="bold"
-                    android:textColor="#374151"
-                    android:layout_marginTop="16dp" />
+                    android:textColor="#374151" />
 
                 <Spinner
                     android:id="@+id/spRole"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp" />
+                    android:layout_marginTop="8dp"
+                    android:layout_marginBottom="24dp" />
 
                 <Button
                     android:id="@+id/btnRegister"
@@ -155,8 +137,7 @@
                     android:textStyle="bold"
                     android:textSize="16sp"
                     android:textColor="#FFFFFF"
-                    android:backgroundTint="#F97316"
-                    android:layout_marginTop="24dp" />
+                    android:backgroundTint="#F97316" />
 
                 <Button
                     android:id="@+id/btnBackToLogin"
@@ -165,10 +146,10 @@
                     android:text="Back to Login"
                     android:textAllCaps="false"
                     android:textStyle="bold"
-                    android:textSize="15sp"
                     android:textColor="#1F2A44"
                     android:backgroundTint="#E9EEF5"
                     android:layout_marginTop="12dp" />
+
             </LinearLayout>
         </androidx.cardview.widget.CardView>
 

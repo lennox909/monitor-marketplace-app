@@ -15,10 +15,14 @@ class OrderConfirmationActivity : AppCompatActivity() {
 
         val orderId = intent.getLongExtra("ORDER_ID", -1)
 
-        findViewById<TextView>(R.id.tvOrderId).text = "Order Confirmed!\nOrder ID: $orderId"
+        findViewById<TextView>(R.id.tvOrderId).text =
+            "Order Confirmed!\nOrder #$orderId\n\nThank you for your purchase."
 
         findViewById<Button>(R.id.btnContinue).setOnClickListener {
-            startActivity(Intent(this, MainActivity::class.java))
+            // Go back to main and clear the back stack
+            val i = Intent(this, MainActivity::class.java)
+            i.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
+            startActivity(i)
             finish()
         }
     }

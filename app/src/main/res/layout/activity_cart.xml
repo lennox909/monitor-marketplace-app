@@ -1,31 +1,36 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
-    android:padding="12dp"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp"
+    android:background="#F5F7FB">
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Cart"
-        android:textSize="18sp"
-        android:textStyle="bold"/>
+        android:text="My Cart"
+        android:textSize="22sp"
+        android:textStyle="bold"
+        android:textColor="#1F2A44"
+        android:layout_marginBottom="12dp" />
 
     <TextView
         android:id="@+id/tvEmptyCart"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Cart is empty"
+        android:text="Your cart is empty."
+        android:gravity="center"
+        android:textColor="#6B7280"
+        android:textSize="14sp"
         android:visibility="gone"
-        android:layout_marginTop="8dp"/>
+        android:layout_marginTop="40dp" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rvCart"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1"
-        android:layout_marginTop="8dp"/>
+        android:layout_weight="1" />
 
     <TextView
         android:id="@+id/tvSubtotal"
@@ -33,11 +38,19 @@
         android:layout_height="wrap_content"
         android:text="Subtotal: $0.00"
         android:textStyle="bold"
-        android:layout_marginTop="8dp"/>
+        android:textSize="16sp"
+        android:textColor="#1F2A44"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="8dp" />
 
     <Button
         android:id="@+id/btnCheckout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Checkout (Mock)"/>
+        android:text="Proceed to Checkout"
+        android:textAllCaps="false"
+        android:textStyle="bold"
+        android:textColor="#FFFFFF"
+        android:backgroundTint="#F97316" />
+
 </LinearLayout>

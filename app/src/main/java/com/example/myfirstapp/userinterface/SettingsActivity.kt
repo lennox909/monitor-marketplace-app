@@ -14,9 +14,13 @@ class SettingsActivity : AppCompatActivity() {
 
         val sw = findViewById<Switch>(R.id.switchTheme)
 
+        // Reflect current mode
+        sw.isChecked = AppCompatDelegate.getDefaultNightMode() == AppCompatDelegate.MODE_NIGHT_YES
+
         sw.setOnCheckedChangeListener { _, isChecked ->
             AppCompatDelegate.setDefaultNightMode(
-                if (isChecked) AppCompatDelegate.MODE_NIGHT_YES else AppCompatDelegate.MODE_NIGHT_NO
+                if (isChecked) AppCompatDelegate.MODE_NIGHT_YES
+                else AppCompatDelegate.MODE_NIGHT_NO
             )
         }
     }

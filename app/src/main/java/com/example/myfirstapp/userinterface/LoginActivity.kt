@@ -19,13 +19,13 @@ class LoginActivity : AppCompatActivity() {
 
         db = DatabaseHelper(this)
 
-        val etEmail = findViewById<EditText>(R.id.etEmail)
-        val etPassword = findViewById<EditText>(R.id.etPassword)
-        val btnLogin = findViewById<Button>(R.id.btnLogin)
+        val etEmail       = findViewById<EditText>(R.id.etEmail)
+        val etPassword    = findViewById<EditText>(R.id.etPassword)
+        val btnLogin      = findViewById<Button>(R.id.btnLogin)
         val btnGoRegister = findViewById<Button>(R.id.btnGoRegister)
 
         btnLogin.setOnClickListener {
-            val email = etEmail.text.toString().trim()
+            val email    = etEmail.text.toString().trim()
             val password = etPassword.text.toString().trim()
 
             if (email.isEmpty() || password.isEmpty()) {
@@ -40,19 +40,27 @@ class LoginActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
 
-            if (user.isDisabled) {
-                Toast.makeText(this, "Your account is disabled", Toast.LENGTH_SHORT).show()
+            if (user.disabled) {
+                Toast.makeText(this, "Your account has been disabled", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
 
             Session.userId = user.id
-            Session.role = user.role
-            Session.isBuyMode = user.role == "BUYER"
+            Session.role   = user.role
 
-            if (user.role == "ADMIN") {
-                startActivity(Intent(this, AdminDashboardActivity::class.java))
-            } else {
-                startActivity(Intent(this, MainActivity::class.java))
+            when (user.role) {
+                "ADMIN" -> {
+                    Session.isBuyMode = false
+                    startActivity(Intent(this, AdminDashboardActivity::class.java))
+                }
+                "SELLER" -> {
+                    Session.isBuyMode = false  // sellers land in sell mode
+                    startActivity(Intent(this, MainActivity::class.java))
+                }
+                else -> {
+                    Session.isBuyMode = true   // buyers land in buy mode
+                    startActivity(Intent(this, MainActivity::class.java))
+                }
             }
             finish()
         }

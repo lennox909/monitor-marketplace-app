@@ -1,10 +1,10 @@
 package com.example.myfirstapp.userinterface
 
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
-import android.widget.Button
-import android.widget.TextView
-import android.widget.Toast
+import android.view.View
+import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import com.example.myfirstapp.R
 import com.example.myfirstapp.data.DatabaseHelper
@@ -18,77 +18,75 @@ class ListingDetailActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_listing_detail)
 
-        db = DatabaseHelper(this)
+        db        = DatabaseHelper(this)
         listingId = intent.getLongExtra("LISTING_ID", -1)
 
-        val tvTitle = findViewById<TextView>(R.id.tvTitle)
-        val tvPrice = findViewById<TextView>(R.id.tvPrice)
-        val tvBrand = findViewById<TextView>(R.id.tvBrand)
-        val tvSize = findViewById<TextView>(R.id.tvSize)
-        val tvResolution = findViewById<TextView>(R.id.tvResolution)
-        val tvRefreshRate = findViewById<TextView>(R.id.tvRefreshRate)
-        val tvCourseTag = findViewById<TextView>(R.id.tvCourseTag)
-        val tvCategory = findViewById<TextView>(R.id.tvCategory)
-        val tvCondition = findViewById<TextView>(R.id.tvCondition)
+        val ivImage       = findViewById<ImageView>(R.id.ivListingImage)
+        val tvTitle       = findViewById<TextView>(R.id.tvTitle)
+        val tvPrice       = findViewById<TextView>(R.id.tvPrice)
+        val tvBrand       = findViewById<TextView>(R.id.tvBrand)
+        val tvScreenSize  = findViewById<TextView>(R.id.tvScreenSize)
+        val tvResolution  = findViewById<TextView>(R.id.tvResolution)
+        val tvCondition   = findViewById<TextView>(R.id.tvCondition)
         val tvDescription = findViewById<TextView>(R.id.tvDescription)
-        val btnPrimary = findViewById<Button>(R.id.btnPrimary)
-        val btnSecondary = findViewById<Button>(R.id.btnSecondary)
+        val btnPrimary    = findViewById<Button>(R.id.btnPrimary)
+        val btnSecondary  = findViewById<Button>(R.id.btnSecondary)
 
         val listing = db.getListingById(listingId)
-
         if (listing == null) {
             Toast.makeText(this, "Listing not found", Toast.LENGTH_SHORT).show()
             finish()
             return
         }
 
-        tvTitle.text = listing.title
-        tvPrice.text = "$${"%.2f".format(listing.price)}"
-        tvBrand.text = "Brand: ${listing.brand}"
-        tvSize.text = "Size: ${listing.size}"
-        tvResolution.text = "Resolution: ${listing.resolution}"
-        tvRefreshRate.text = "Refresh Rate: ${listing.refreshRate}"
-        tvCourseTag.text = "Course Tag: ${listing.courseTag}"
-        tvCategory.text = "Category: ${listing.category}"
-        tvCondition.text = "Condition: ${listing.condition}"
+        // Load image safely — hide if missing or unreadable
+        if (!listing.photoUri.isNullOrEmpty()) {
+            try {
+                ivImage.setImageURI(Uri.parse(listing.photoUri))
+                ivImage.visibility = View.VISIBLE
+            } catch (e: Exception) {
+                ivImage.visibility = View.GONE
+            }
+        } else {
+            ivImage.visibility = View.GONE
+        }
+
+        tvTitle.text       = listing.title
+        tvPrice.text       = "$${String.format("%.2f", listing.price)}"
+        tvBrand.text       = "Brand: ${listing.brand}"
+        tvScreenSize.text  = "Screen Size: ${listing.screenSize}"
+        tvResolution.text  = "Resolution: ${listing.resolution}"
+        tvCondition.text   = "Condition: ${listing.condition}"
         tvDescription.text = listing.description
 
         val isOwner = listing.sellerId == Session.userId
 
-        if (Session.role == "BUYER") {
-            btnPrimary.text = "Add to Cart"
+        if (Session.isBuyMode) {
+            btnPrimary.text   = "Add to Cart"
             btnSecondary.text = "Back"
 
             btnPrimary.setOnClickListener {
-                db.addToCart(Session.userId, listing.id, 1)
-                Toast.makeText(this, "Added to cart", Toast.LENGTH_SHORT).show()
+                db.addToCart(Session.userId, listingId, 1)
+                Toast.makeText(this, "Added to cart!", Toast.LENGTH_SHORT).show()
             }
+            btnSecondary.setOnClickListener { finish() }
 
-            btnSecondary.setOnClickListener {
-                finish()
-            }
         } else {
-            btnPrimary.text = "Edit Listing"
-            btnSecondary.text = "Delete Listing"
+            btnPrimary.text   = "Edit"
+            btnSecondary.text = "Delete"
+
+            btnPrimary.isEnabled   = isOwner
+            btnSecondary.isEnabled = isOwner
+            btnPrimary.alpha       = if (isOwner) 1f else 0.4f
+            btnSecondary.alpha     = if (isOwner) 1f else 0.4f
 
             btnPrimary.setOnClickListener {
-                if (!isOwner) {
-                    Toast.makeText(this, "You can only edit your own listing", Toast.LENGTH_SHORT).show()
-                    return@setOnClickListener
-                }
-
-                val intent = Intent(this, AddEditListingActivity::class.java)
-                intent.putExtra("EDIT_ID", listing.id)
-                startActivity(intent)
+                val i = Intent(this, AddEditListingActivity::class.java)
+                i.putExtra("EDIT_ID", listingId)
+                startActivity(i)
             }
-
             btnSecondary.setOnClickListener {
-                if (!isOwner) {
-                    Toast.makeText(this, "You can only delete your own listing", Toast.LENGTH_SHORT).show()
-                    return@setOnClickListener
-                }
-
-                db.deleteListing(listing.id)
+                db.deleteListing(listingId)
                 Toast.makeText(this, "Listing deleted", Toast.LENGTH_SHORT).show()
                 finish()
             }

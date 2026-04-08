@@ -14,13 +14,13 @@
         android:textSize="24sp"
         android:textStyle="bold"
         android:textColor="#1F2A44"
-        android:layout_marginBottom="8dp" />
+        android:layout_marginBottom="4dp" />
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Manage users and monitor marketplace activity"
-        android:textSize="14sp"
+        android:text="Tap a user to enable or disable their account"
+        android:textSize="13sp"
         android:textColor="#6B7280"
         android:layout_marginBottom="16dp" />
 
@@ -41,7 +41,7 @@
         android:layout_height="0dp"
         android:layout_weight="1"
         android:divider="#D1D5DB"
-        android:dividerHeight="10dp" />
+        android:dividerHeight="1dp" />
 
     <Button
         android:id="@+id/btnAdminLogout"

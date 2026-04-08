@@ -2,6 +2,7 @@ package com.example.myfirstapp.userinterface
 
 import android.content.Intent
 import android.os.Bundle
+import android.view.View
 import android.widget.Button
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
@@ -21,9 +22,9 @@ class CartActivity : AppCompatActivity() {
 
         db = DatabaseHelper(this)
 
-        val rvCart = findViewById<RecyclerView>(R.id.rvCart)
-        val tvSubtotal = findViewById<TextView>(R.id.tvSubtotal)
-        val tvEmpty = findViewById<TextView>(R.id.tvEmptyCart)
+        val rvCart      = findViewById<RecyclerView>(R.id.rvCart)
+        val tvSubtotal  = findViewById<TextView>(R.id.tvSubtotal)
+        val tvEmpty     = findViewById<TextView>(R.id.tvEmptyCart)
         val btnCheckout = findViewById<Button>(R.id.btnCheckout)
 
         rvCart.layoutManager = LinearLayoutManager(this)
@@ -31,7 +32,11 @@ class CartActivity : AppCompatActivity() {
         adapter = CartAdapter(
             items = mutableListOf(),
             onQtyChanged = { row, newQty ->
-                db.updateCartItemQuantity(row.cartItemId, newQty)
+                if (newQty <= 0) {
+                    db.removeCartItem(row.cartItemId)
+                } else {
+                    db.updateCartItemQuantity(row.cartItemId, newQty)
+                }
                 refresh(tvSubtotal, tvEmpty, btnCheckout)
             },
             onRemove = { row ->
@@ -48,6 +53,14 @@ class CartActivity : AppCompatActivity() {
         refresh(tvSubtotal, tvEmpty, btnCheckout)
     }
 
+    override fun onResume() {
+        super.onResume()
+        val tvSubtotal  = findViewById<TextView>(R.id.tvSubtotal)
+        val tvEmpty     = findViewById<TextView>(R.id.tvEmptyCart)
+        val btnCheckout = findViewById<Button>(R.id.btnCheckout)
+        refresh(tvSubtotal, tvEmpty, btnCheckout)
+    }
+
     private fun refresh(tvSubtotal: TextView, tvEmpty: TextView, btnCheckout: Button) {
         val cartItems = db.getCartItems(Session.userId)
 
@@ -59,8 +72,8 @@ class CartActivity : AppCompatActivity() {
         adapter.setData(rows)
 
         val subtotal = rows.sumOf { it.price * it.qty }
-        tvSubtotal.text = "Subtotal: $${"%.2f".format(subtotal)}"
+        tvSubtotal.text     = "Subtotal: $${String.format("%.2f", subtotal)}"
         btnCheckout.isEnabled = rows.isNotEmpty()
-        tvEmpty.visibility = if (rows.isEmpty()) android.view.View.VISIBLE else android.view.View.GONE
+        tvEmpty.visibility  = if (rows.isEmpty()) View.VISIBLE else View.GONE
     }
 }

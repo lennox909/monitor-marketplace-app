@@ -17,34 +17,59 @@ class CheckoutActivity : AppCompatActivity() {
 
         db = DatabaseHelper(this)
 
-        val etName = findViewById<EditText>(R.id.etShipName)
-        val etAddress = findViewById<EditText>(R.id.etShipAddress)
-        val etCity = findViewById<EditText>(R.id.etShipCity)
-        val spPayment = findViewById<Spinner>(R.id.spPayment)
-        val btnPlace = findViewById<Button>(R.id.btnPlaceOrder)
-
-        spPayment.adapter = ArrayAdapter(
-            this,
-            android.R.layout.simple_spinner_dropdown_item,
-            listOf("Mock Card", "Mock PayPal", "Mock Apple Pay")
-        )
+        val etFirstName   = findViewById<EditText>(R.id.etFirstName)
+        val etLastName    = findViewById<EditText>(R.id.etLastName)
+        val etAddress     = findViewById<EditText>(R.id.etShipAddress)
+        val etApt         = findViewById<EditText>(R.id.etApt)
+        val etCity        = findViewById<EditText>(R.id.etShipCity)
+        val etState       = findViewById<EditText>(R.id.etState)
+        val etZip         = findViewById<EditText>(R.id.etZip)
+        val etCardNumber  = findViewById<EditText>(R.id.etCardNumber)
+        val etExpiry      = findViewById<EditText>(R.id.etExpiry)
+        val etCVV         = findViewById<EditText>(R.id.etCVV)
+        val etCardName    = findViewById<EditText>(R.id.etCardName)
+        val btnPlace      = findViewById<Button>(R.id.btnPlaceOrder)
 
         btnPlace.setOnClickListener {
-            val name = etName.text.toString().trim()
-            val address = etAddress.text.toString().trim()
-            val city = etCity.text.toString().trim()
-            val payment = spPayment.selectedItem.toString()
+            val firstName  = etFirstName.text.toString().trim()
+            val lastName   = etLastName.text.toString().trim()
+            val address    = etAddress.text.toString().trim()
+            val city       = etCity.text.toString().trim()
+            val state      = etState.text.toString().trim()
+            val zip        = etZip.text.toString().trim()
+            val cardNumber = etCardNumber.text.toString().trim()
+            val expiry     = etExpiry.text.toString().trim()
+            val cvv        = etCVV.text.toString().trim()
+            val cardName   = etCardName.text.toString().trim()
 
-            if (name.isEmpty() || address.isEmpty() || city.isEmpty()) {
-                Toast.makeText(this, "Fill shipping fields", Toast.LENGTH_SHORT).show()
+            // Validate shipping
+            if (firstName.isEmpty() || lastName.isEmpty() || address.isEmpty() ||
+                city.isEmpty() || state.isEmpty() || zip.isEmpty()) {
+                Toast.makeText(this, "Please fill in all shipping fields", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
 
-            val shippingInfo = "Name=$name; Address=$address; City=$city"
-            val orderId = db.placeOrder(Session.userId, shippingInfo, payment)
+            // Validate card
+            if (cardNumber.isEmpty() || expiry.isEmpty() || cvv.isEmpty() || cardName.isEmpty()) {
+                Toast.makeText(this, "Please fill in all card fields", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
+            if (cardNumber.length < 16) {
+                Toast.makeText(this, "Enter a valid 16-digit card number", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
+            if (cvv.length < 3) {
+                Toast.makeText(this, "Enter a valid CVV", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
+            val shippingInfo = "$firstName $lastName, $address, $city, $state $zip"
+            val orderId = db.placeOrder(Session.userId, shippingInfo, "Card")
 
             if (orderId <= 0) {
-                Toast.makeText(this, "Checkout failed (cart empty or items unavailable)", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Checkout failed — cart may be empty", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
 
