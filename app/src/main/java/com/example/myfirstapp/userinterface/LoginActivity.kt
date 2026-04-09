@@ -2,9 +2,7 @@ package com.example.myfirstapp.userinterface
 
 import android.content.Intent
 import android.os.Bundle
-import android.widget.Button
-import android.widget.EditText
-import android.widget.Toast
+import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import com.example.myfirstapp.R
 import com.example.myfirstapp.data.DatabaseHelper
@@ -33,36 +31,48 @@ class LoginActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
 
-            val user = db.login(email, password)
+            // Disable button while logging in
+            btnLogin.isEnabled = false
+            btnLogin.text      = "Logging in..."
 
-            if (user == null) {
-                Toast.makeText(this, "Invalid email or password", Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
-            }
+            // DB call off main thread
+            Thread {
+                val user = db.login(email, password)
 
-            if (user.disabled) {
-                Toast.makeText(this, "Your account has been disabled", Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
-            }
+                runOnUiThread {
+                    btnLogin.isEnabled = true
+                    btnLogin.text      = "Login"
 
-            Session.userId = user.id
-            Session.role   = user.role
+                    if (user == null) {
+                        Toast.makeText(this, "Invalid email or password", Toast.LENGTH_SHORT).show()
+                        return@runOnUiThread
+                    }
 
-            when (user.role) {
-                "ADMIN" -> {
-                    Session.isBuyMode = false
-                    startActivity(Intent(this, AdminDashboardActivity::class.java))
+                    if (user.disabled) {
+                        Toast.makeText(this, "Your account has been disabled", Toast.LENGTH_SHORT).show()
+                        return@runOnUiThread
+                    }
+
+                    Session.userId = user.id
+                    Session.role   = user.role
+
+                    when (user.role) {
+                        "ADMIN"  -> {
+                            Session.isBuyMode = false
+                            startActivity(Intent(this, AdminDashboardActivity::class.java))
+                        }
+                        "SELLER" -> {
+                            Session.isBuyMode = false
+                            startActivity(Intent(this, MainActivity::class.java))
+                        }
+                        else     -> {
+                            Session.isBuyMode = true
+                            startActivity(Intent(this, MainActivity::class.java))
+                        }
+                    }
+                    finish()
                 }
-                "SELLER" -> {
-                    Session.isBuyMode = false  // sellers land in sell mode
-                    startActivity(Intent(this, MainActivity::class.java))
-                }
-                else -> {
-                    Session.isBuyMode = true   // buyers land in buy mode
-                    startActivity(Intent(this, MainActivity::class.java))
-                }
-            }
-            finish()
+            }.start()
         }
 
         btnGoRegister.setOnClickListener {

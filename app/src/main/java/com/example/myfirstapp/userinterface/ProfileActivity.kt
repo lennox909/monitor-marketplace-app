@@ -14,13 +14,20 @@ class ProfileActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_profile)
 
-        val db   = DatabaseHelper(this)
-        val user = db.getUserByEmail(
-            db.getAllUsers().firstOrNull { it.id == Session.userId }?.email ?: ""
-        )
+        val tvProfileInfo = findViewById<TextView>(R.id.tvProfileInfo)
 
-        findViewById<TextView>(R.id.tvProfileInfo).text =
-            "Name: ${user?.name ?: "N/A"}\nEmail: ${user?.email ?: "N/A"}\nRole: ${Session.role}"
+        // Load user info off main thread
+        Thread {
+            val db   = DatabaseHelper(this)
+            val user = db.getAllUsers().firstOrNull { it.id == Session.userId }
+
+            runOnUiThread {
+                tvProfileInfo.text =
+                    "Name:   ${user?.name  ?: "N/A"}\n\n" +
+                            "Email:  ${user?.email ?: "N/A"}\n\n" +
+                            "Role:   ${Session.role}"
+            }
+        }.start()
 
         findViewById<Button>(R.id.btnSettings).setOnClickListener {
             startActivity(Intent(this, SettingsActivity::class.java))

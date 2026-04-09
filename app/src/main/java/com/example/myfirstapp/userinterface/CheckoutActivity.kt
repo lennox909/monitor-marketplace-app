@@ -17,18 +17,18 @@ class CheckoutActivity : AppCompatActivity() {
 
         db = DatabaseHelper(this)
 
-        val etFirstName   = findViewById<EditText>(R.id.etFirstName)
-        val etLastName    = findViewById<EditText>(R.id.etLastName)
-        val etAddress     = findViewById<EditText>(R.id.etShipAddress)
-        val etApt         = findViewById<EditText>(R.id.etApt)
-        val etCity        = findViewById<EditText>(R.id.etShipCity)
-        val etState       = findViewById<EditText>(R.id.etState)
-        val etZip         = findViewById<EditText>(R.id.etZip)
-        val etCardNumber  = findViewById<EditText>(R.id.etCardNumber)
-        val etExpiry      = findViewById<EditText>(R.id.etExpiry)
-        val etCVV         = findViewById<EditText>(R.id.etCVV)
-        val etCardName    = findViewById<EditText>(R.id.etCardName)
-        val btnPlace      = findViewById<Button>(R.id.btnPlaceOrder)
+        val etFirstName  = findViewById<EditText>(R.id.etFirstName)
+        val etLastName   = findViewById<EditText>(R.id.etLastName)
+        val etAddress    = findViewById<EditText>(R.id.etShipAddress)
+        val etApt        = findViewById<EditText>(R.id.etApt)
+        val etCity       = findViewById<EditText>(R.id.etShipCity)
+        val etState      = findViewById<EditText>(R.id.etState)
+        val etZip        = findViewById<EditText>(R.id.etZip)
+        val etCardNumber = findViewById<EditText>(R.id.etCardNumber)
+        val etExpiry     = findViewById<EditText>(R.id.etExpiry)
+        val etCVV        = findViewById<EditText>(R.id.etCVV)
+        val etCardName   = findViewById<EditText>(R.id.etCardName)
+        val btnPlace     = findViewById<Button>(R.id.btnPlaceOrder)
 
         btnPlace.setOnClickListener {
             val firstName  = etFirstName.text.toString().trim()
@@ -42,14 +42,12 @@ class CheckoutActivity : AppCompatActivity() {
             val cvv        = etCVV.text.toString().trim()
             val cardName   = etCardName.text.toString().trim()
 
-            // Validate shipping
             if (firstName.isEmpty() || lastName.isEmpty() || address.isEmpty() ||
                 city.isEmpty() || state.isEmpty() || zip.isEmpty()) {
                 Toast.makeText(this, "Please fill in all shipping fields", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
 
-            // Validate card
             if (cardNumber.isEmpty() || expiry.isEmpty() || cvv.isEmpty() || cardName.isEmpty()) {
                 Toast.makeText(this, "Please fill in all card fields", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
@@ -65,18 +63,30 @@ class CheckoutActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
 
+            btnPlace.isEnabled = false
+            btnPlace.text      = "Placing order..."
+
             val shippingInfo = "$firstName $lastName, $address, $city, $state $zip"
-            val orderId = db.placeOrder(Session.userId, shippingInfo, "Card")
 
-            if (orderId <= 0) {
-                Toast.makeText(this, "Checkout failed — cart may be empty", Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
-            }
+            // DB call off main thread
+            Thread {
+                val orderId = db.placeOrder(Session.userId, shippingInfo, "Card")
 
-            val i = Intent(this, OrderConfirmationActivity::class.java)
-            i.putExtra("ORDER_ID", orderId)
-            startActivity(i)
-            finish()
+                runOnUiThread {
+                    btnPlace.isEnabled = true
+                    btnPlace.text      = "Place Order"
+
+                    if (orderId <= 0) {
+                        Toast.makeText(this, "Checkout failed — cart may be empty", Toast.LENGTH_SHORT).show()
+                        return@runOnUiThread
+                    }
+
+                    val i = Intent(this, OrderConfirmationActivity::class.java)
+                    i.putExtra("ORDER_ID", orderId)
+                    startActivity(i)
+                    finish()
+                }
+            }.start()
         }
     }
 }

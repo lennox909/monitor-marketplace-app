@@ -17,43 +17,54 @@ class AdminDashboardActivity : AppCompatActivity() {
 
         db = DatabaseHelper(this)
 
-        val tvAdmin        = findViewById<TextView>(R.id.tvAdmin)
-        val btnRefreshUsers= findViewById<Button>(R.id.btnRefreshUsers)
-        val lvUsers        = findViewById<ListView>(R.id.lvUsers)
-        val btnAdminLogout = findViewById<Button>(R.id.btnAdminLogout)
+        val tvAdmin         = findViewById<TextView>(R.id.tvAdmin)
+        val btnRefreshUsers = findViewById<Button>(R.id.btnRefreshUsers)
+        val lvUsers         = findViewById<ListView>(R.id.lvUsers)
+        val btnAdminLogout  = findViewById<Button>(R.id.btnAdminLogout)
 
         fun refreshUsers() {
-            val users = db.getAllUsers()
-            tvAdmin.text = "Admin Dashboard — ${users.size} users"
+            Thread {
+                val users = db.getAllUsers()
 
-            val displayList = users.map { user ->
-                val status = if (user.disabled) "DISABLED" else "ACTIVE"
-                "${user.name}  |  ${user.role}  |  $status\n${user.email}"
-            }
+                runOnUiThread {
+                    tvAdmin.text = "Admin Dashboard — ${users.size} users"
 
-            lvUsers.adapter = ArrayAdapter(
-                this,
-                android.R.layout.simple_list_item_1,
-                displayList
-            )
+                    val displayList = users.map { user ->
+                        val status = if (user.disabled) "DISABLED" else "ACTIVE"
+                        "${user.name}  |  ${user.role}  |  $status\n${user.email}"
+                    }
 
-            lvUsers.setOnItemClickListener { _, _, position, _ ->
-                val user = users[position]
+                    lvUsers.adapter = ArrayAdapter(
+                        this,
+                        android.R.layout.simple_list_item_1,
+                        displayList
+                    )
 
-                if (user.role == "ADMIN") {
-                    Toast.makeText(this, "Cannot disable admin account", Toast.LENGTH_SHORT).show()
-                    return@setOnItemClickListener
+                    lvUsers.setOnItemClickListener { _, _, position, _ ->
+                        val user = users[position]
+
+                        if (user.role == "ADMIN") {
+                            Toast.makeText(this, "Cannot disable admin account", Toast.LENGTH_SHORT).show()
+                            return@setOnItemClickListener
+                        }
+
+                        Thread {
+                            val newState = !user.disabled
+                            db.setUserDisabled(user.id, newState)
+
+                            runOnUiThread {
+                                Toast.makeText(
+                                    this,
+                                    if (newState) "${user.name} disabled"
+                                    else "${user.name} enabled",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                                refreshUsers()
+                            }
+                        }.start()
+                    }
                 }
-
-                val newState = !user.disabled
-                db.setUserDisabled(user.id, newState)
-                Toast.makeText(
-                    this,
-                    if (newState) "${user.name} disabled" else "${user.name} enabled",
-                    Toast.LENGTH_SHORT
-                ).show()
-                refreshUsers()
-            }
+            }.start()
         }
 
         btnRefreshUsers.setOnClickListener { refreshUsers() }

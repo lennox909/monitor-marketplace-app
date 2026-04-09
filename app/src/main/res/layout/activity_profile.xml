@@ -10,18 +10,35 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="My Profile"
-        android:textSize="24sp"
+        android:textSize="26sp"
         android:textStyle="bold"
         android:textColor="#1F2A44"
-        android:layout_marginBottom="20dp" />
+        android:layout_marginBottom="24dp" />
 
-    <TextView
-        android:id="@+id/tvProfileInfo"
+    <androidx.cardview.widget.CardView
+        xmlns:app="http://schemas.android.com/apk/res-auto"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:textSize="15sp"
-        android:textColor="#374151" />
+        android:layout_height="wrap_content"
+        app:cardCornerRadius="16dp"
+        app:cardElevation="4dp"
+        android:layout_marginBottom="24dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="20dp">
+
+            <TextView
+                android:id="@+id/tvProfileInfo"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="15sp"
+                android:textColor="#374151"
+                android:lineSpacingExtra="6dp" />
+
+        </LinearLayout>
+    </androidx.cardview.widget.CardView>
 
     <Button
         android:id="@+id/btnSettings"
@@ -32,7 +49,7 @@
         android:textStyle="bold"
         android:textColor="#1F2A44"
         android:backgroundTint="#E5E7EB"
-        android:layout_marginBottom="10dp" />
+        android:layout_marginBottom="12dp" />
 
     <Button
         android:id="@+id/btnLogout"

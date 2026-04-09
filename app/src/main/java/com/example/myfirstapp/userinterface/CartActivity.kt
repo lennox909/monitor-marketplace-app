@@ -3,8 +3,7 @@ package com.example.myfirstapp.userinterface
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
-import android.widget.Button
-import android.widget.TextView
+import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -32,16 +31,17 @@ class CartActivity : AppCompatActivity() {
         adapter = CartAdapter(
             items = mutableListOf(),
             onQtyChanged = { row, newQty ->
-                if (newQty <= 0) {
-                    db.removeCartItem(row.cartItemId)
-                } else {
-                    db.updateCartItemQuantity(row.cartItemId, newQty)
-                }
-                refresh(tvSubtotal, tvEmpty, btnCheckout)
+                Thread {
+                    if (newQty <= 0) db.removeCartItem(row.cartItemId)
+                    else db.updateCartItemQuantity(row.cartItemId, newQty)
+                    runOnUiThread { refresh(tvSubtotal, tvEmpty, btnCheckout) }
+                }.start()
             },
             onRemove = { row ->
-                db.removeCartItem(row.cartItemId)
-                refresh(tvSubtotal, tvEmpty, btnCheckout)
+                Thread {
+                    db.removeCartItem(row.cartItemId)
+                    runOnUiThread { refresh(tvSubtotal, tvEmpty, btnCheckout) }
+                }.start()
             }
         )
         rvCart.adapter = adapter
@@ -62,18 +62,20 @@ class CartActivity : AppCompatActivity() {
     }
 
     private fun refresh(tvSubtotal: TextView, tvEmpty: TextView, btnCheckout: Button) {
-        val cartItems = db.getCartItems(Session.userId)
+        Thread {
+            val cartItems = db.getCartItems(Session.userId)
+            val rows = cartItems.mapNotNull { ci ->
+                val l = db.getListingById(ci.listingId) ?: return@mapNotNull null
+                CartRow(ci.id, l.id, l.title, l.price, ci.quantity)
+            }
+            val subtotal = rows.sumOf { it.price * it.qty }
 
-        val rows = cartItems.mapNotNull { ci ->
-            val l = db.getListingById(ci.listingId) ?: return@mapNotNull null
-            CartRow(ci.id, l.id, l.title, l.price, ci.quantity)
-        }
-
-        adapter.setData(rows)
-
-        val subtotal = rows.sumOf { it.price * it.qty }
-        tvSubtotal.text     = "Subtotal: $${String.format("%.2f", subtotal)}"
-        btnCheckout.isEnabled = rows.isNotEmpty()
-        tvEmpty.visibility  = if (rows.isEmpty()) View.VISIBLE else View.GONE
+            runOnUiThread {
+                adapter.setData(rows)
+                tvSubtotal.text     = "Subtotal: $${String.format("%.2f", subtotal)}"
+                btnCheckout.isEnabled = rows.isNotEmpty()
+                tvEmpty.visibility  = if (rows.isEmpty()) View.VISIBLE else View.GONE
+            }
+        }.start()
     }
 }

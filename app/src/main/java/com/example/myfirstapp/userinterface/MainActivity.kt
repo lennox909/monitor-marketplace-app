@@ -31,28 +31,20 @@ class MainActivity : AppCompatActivity() {
         val btnLogout     = findViewById<Button>(R.id.btnLogout)
         val recycler      = findViewById<RecyclerView>(R.id.recyclerView)
         val tvEmpty       = findViewById<TextView>(R.id.tvEmpty)
-
-        // Search + filter views (buyer only)
-        val searchBar     = findViewById<View>(R.id.searchBar)
         val etSearch      = findViewById<EditText>(R.id.etSearch)
         val spCategory    = findViewById<Spinner>(R.id.spCategory)
         val btnSearch     = findViewById<Button>(R.id.btnSearch)
 
         val isSeller = Session.role == "SELLER"
 
-        // Title
         tvWelcome.text = if (isSeller) "My Listings" else "Monitor Marketplace"
 
-        // Show/hide role-specific buttons
         btnAddListing.visibility = if (isSeller) View.VISIBLE else View.GONE
-        btnCart.visibility       = if (isSeller) View.GONE else View.VISIBLE
+        btnCart.visibility       = if (isSeller) View.GONE   else View.VISIBLE
+        etSearch.visibility      = if (isSeller) View.GONE   else View.VISIBLE
+        spCategory.visibility    = if (isSeller) View.GONE   else View.VISIBLE
+        btnSearch.visibility     = if (isSeller) View.GONE   else View.VISIBLE
 
-        // Show/hide search and filter (buyers only)
-        searchBar.visibility  = if (isSeller) View.GONE else View.VISIBLE
-        spCategory.visibility = if (isSeller) View.GONE else View.VISIBLE
-        btnSearch.visibility  = if (isSeller) View.GONE else View.VISIBLE
-
-        // Recycler
         recycler.layoutManager = LinearLayoutManager(this)
         adapter = ListingAdapter(emptyList()) { listingId ->
             val i = Intent(this, ListingDetailActivity::class.java)
@@ -61,14 +53,12 @@ class MainActivity : AppCompatActivity() {
         }
         recycler.adapter = adapter
 
-        // Condition filter options for buyers
         spCategory.adapter = ArrayAdapter(
             this,
             android.R.layout.simple_spinner_dropdown_item,
             listOf("All Conditions", "New", "Like New", "Used")
         )
 
-        // Live search (buyer only)
         etSearch.addTextChangedListener(object : TextWatcher {
             override fun afterTextChanged(s: Editable?) {
                 applyFilters(s.toString(), spCategory.selectedItem.toString(), tvEmpty, recycler)
@@ -111,15 +101,24 @@ class MainActivity : AppCompatActivity() {
         val spCategory = findViewById<Spinner>(R.id.spCategory)
         val tvEmpty    = findViewById<TextView>(R.id.tvEmpty)
         val recycler   = findViewById<RecyclerView>(R.id.recyclerView)
-        refreshListings()
-        applyFilters(etSearch.text.toString(), spCategory.selectedItem.toString(), tvEmpty, recycler)
-    }
 
-    private fun refreshListings() {
-        allListings = if (Session.role == "SELLER")
-            db.getListingsBySeller(Session.userId)
-        else
-            db.getAllListingsGlobal()
+        // Run DB call off main thread
+        Thread {
+            val listings = if (Session.role == "SELLER")
+                db.getListingsBySeller(Session.userId)
+            else
+                db.getAllListingsGlobal()
+
+            runOnUiThread {
+                allListings = listings
+                applyFilters(
+                    etSearch.text.toString(),
+                    spCategory.selectedItem.toString(),
+                    tvEmpty,
+                    recycler
+                )
+            }
+        }.start()
     }
 
     private fun applyFilters(
@@ -140,6 +139,6 @@ class MainActivity : AppCompatActivity() {
         adapter.updateData(filtered)
 
         tvEmpty.visibility  = if (filtered.isEmpty()) View.VISIBLE else View.GONE
-        recycler.visibility = if (filtered.isEmpty()) View.GONE else View.VISIBLE
+        recycler.visibility = if (filtered.isEmpty()) View.GONE   else View.VISIBLE
     }
 }
