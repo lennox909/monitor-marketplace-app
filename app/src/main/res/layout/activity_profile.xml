@@ -13,8 +13,16 @@
         android:textSize="26sp"
         android:textStyle="bold"
         android:textColor="#1F2A44"
-        android:layout_marginBottom="24dp" />
+        android:layout_marginBottom="20dp" />
 
+    <ProgressBar
+        android:id="@+id/progressProfile"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        android:layout_marginBottom="8dp" />
+
+    <!-- Profile card -->
     <androidx.cardview.widget.CardView
         xmlns:app="http://schemas.android.com/apk/res-auto"
         android:layout_width="match_parent"
@@ -30,15 +38,72 @@
             android:padding="20dp">
 
             <TextView
-                android:id="@+id/tvProfileInfo"
+                android:id="@+id/tvProfileName"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textSize="15sp"
-                android:textColor="#374151"
-                android:lineSpacingExtra="6dp" />
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:textColor="#1F2A44"
+                android:layout_marginBottom="6dp" />
+
+            <TextView
+                android:id="@+id/tvProfileEmail"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="14sp"
+                android:textColor="#6B7280"
+                android:layout_marginBottom="6dp" />
+
+            <TextView
+                android:id="@+id/tvProfileRole"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="13sp"
+                android:textColor="#FFFFFF"
+                android:backgroundTint="#F97316"
+                android:background="@android:drawable/btn_default"
+                android:paddingStart="12dp"
+                android:paddingEnd="12dp"
+                android:paddingTop="4dp"
+                android:paddingBottom="4dp" />
 
         </LinearLayout>
     </androidx.cardview.widget.CardView>
+
+    <Button
+        android:id="@+id/btnEditProfile"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Edit Profile"
+        android:textAllCaps="false"
+        android:textStyle="bold"
+        android:textColor="#FFFFFF"
+        android:backgroundTint="#F97316"
+        android:layout_marginBottom="10dp" />
+
+    <Button
+        android:id="@+id/btnMyOrders"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="My Orders"
+        android:textAllCaps="false"
+        android:textStyle="bold"
+        android:textColor="#1F2A44"
+        android:backgroundTint="#E5E7EB"
+        android:layout_marginBottom="10dp"
+        android:visibility="gone" />
+
+    <Button
+        android:id="@+id/btnMyListings"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="My Listings"
+        android:textAllCaps="false"
+        android:textStyle="bold"
+        android:textColor="#1F2A44"
+        android:backgroundTint="#E5E7EB"
+        android:layout_marginBottom="10dp"
+        android:visibility="gone" />
 
     <Button
         android:id="@+id/btnSettings"
@@ -49,7 +114,7 @@
         android:textStyle="bold"
         android:textColor="#1F2A44"
         android:backgroundTint="#E5E7EB"
-        android:layout_marginBottom="12dp" />
+        android:layout_marginBottom="10dp" />
 
     <Button
         android:id="@+id/btnLogout"
@@ -59,6 +124,6 @@
         android:textAllCaps="false"
         android:textStyle="bold"
         android:textColor="#FFFFFF"
-        android:backgroundTint="#F97316" />
+        android:backgroundTint="#EF4444" />
 
 </LinearLayout>

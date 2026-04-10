@@ -2,7 +2,9 @@ package com.example.myfirstapp.userinterface
 
 import android.content.Intent
 import android.os.Bundle
+import android.view.View
 import android.widget.*
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.example.myfirstapp.R
 import com.example.myfirstapp.data.DatabaseHelper
@@ -17,57 +19,164 @@ class AdminDashboardActivity : AppCompatActivity() {
 
         db = DatabaseHelper(this)
 
-        val tvAdmin         = findViewById<TextView>(R.id.tvAdmin)
-        val btnRefreshUsers = findViewById<Button>(R.id.btnRefreshUsers)
-        val lvUsers         = findViewById<ListView>(R.id.lvUsers)
-        val btnAdminLogout  = findViewById<Button>(R.id.btnAdminLogout)
+        val tvStats        = findViewById<TextView>(R.id.tvStats)
+        val btnTabUsers    = findViewById<Button>(R.id.btnTabUsers)
+        val btnTabListings = findViewById<Button>(R.id.btnTabListings)
+        val lvContent      = findViewById<ListView>(R.id.lvContent)
+        val tvEmpty        = findViewById<TextView>(R.id.tvAdminEmpty)
+        val tvLabel        = findViewById<TextView>(R.id.tvContentLabel)
+        val progressAdmin  = findViewById<ProgressBar>(R.id.progressAdmin)
+        val btnAdminLogout = findViewById<Button>(R.id.btnAdminLogout)
 
-        fun refreshUsers() {
+        val orange = android.graphics.Color.parseColor("#F97316")
+        val gray   = android.graphics.Color.parseColor("#E5E7EB")
+        val white  = android.graphics.Color.WHITE
+        val dark   = android.graphics.Color.parseColor("#1F2A44")
+
+        fun setActiveTab(usersActive: Boolean) {
+            btnTabUsers.backgroundTintList    = android.content.res.ColorStateList.valueOf(if (usersActive) orange else gray)
+            btnTabListings.backgroundTintList = android.content.res.ColorStateList.valueOf(if (!usersActive) orange else gray)
+            btnTabUsers.setTextColor(if (usersActive) white else dark)
+            btnTabListings.setTextColor(if (!usersActive) white else dark)
+        }
+
+        fun loadStats() {
+            Thread {
+                val users    = db.getAllUsers().size
+                val listings = db.getAllListingsForAdmin().size
+                runOnUiThread {
+                    tvStats.text = "👥 $users users   •   📋 $listings listings"
+                }
+            }.start()
+        }
+
+        fun loadUsers() {
+            setActiveTab(true)
+            tvLabel.text             = "Users — tap to enable / disable"
+            progressAdmin.visibility = View.VISIBLE
+            lvContent.visibility     = View.GONE
+            tvEmpty.visibility       = View.GONE
+
             Thread {
                 val users = db.getAllUsers()
-
                 runOnUiThread {
-                    tvAdmin.text = "Admin Dashboard — ${users.size} users"
+                    progressAdmin.visibility = View.GONE
+
+                    if (users.isEmpty()) {
+                        tvEmpty.visibility = View.VISIBLE
+                        tvEmpty.text       = "No users found."
+                        return@runOnUiThread
+                    }
 
                     val displayList = users.map { user ->
-                        val status = if (user.disabled) "DISABLED" else "ACTIVE"
+                        val status = if (user.disabled) "🔴 DISABLED" else "🟢 ACTIVE"
                         "${user.name}  |  ${user.role}  |  $status\n${user.email}"
                     }
 
-                    lvUsers.adapter = ArrayAdapter(
-                        this,
-                        android.R.layout.simple_list_item_1,
-                        displayList
+                    lvContent.adapter = ArrayAdapter(
+                        this, android.R.layout.simple_list_item_1, displayList
                     )
+                    lvContent.visibility = View.VISIBLE
 
-                    lvUsers.setOnItemClickListener { _, _, position, _ ->
+                    lvContent.setOnItemClickListener { _, _, position, _ ->
                         val user = users[position]
-
                         if (user.role == "ADMIN") {
                             Toast.makeText(this, "Cannot disable admin account", Toast.LENGTH_SHORT).show()
                             return@setOnItemClickListener
                         }
 
-                        Thread {
-                            val newState = !user.disabled
-                            db.setUserDisabled(user.id, newState)
-
-                            runOnUiThread {
-                                Toast.makeText(
-                                    this,
-                                    if (newState) "${user.name} disabled"
-                                    else "${user.name} enabled",
-                                    Toast.LENGTH_SHORT
-                                ).show()
-                                refreshUsers()
+                        val newState = !user.disabled
+                        AlertDialog.Builder(this)
+                            .setTitle(if (newState) "Disable User" else "Enable User")
+                            .setMessage(
+                                "Name: ${user.name}\nEmail: ${user.email}\nRole: ${user.role}\n\n" +
+                                        if (newState) "Disable this account?" else "Enable this account?"
+                            )
+                            .setPositiveButton(if (newState) "Disable" else "Enable") { _, _ ->
+                                Thread {
+                                    db.setUserDisabled(user.id, newState)
+                                    runOnUiThread {
+                                        Toast.makeText(
+                                            this,
+                                            if (newState) "${user.name} disabled" else "${user.name} enabled",
+                                            Toast.LENGTH_SHORT
+                                        ).show()
+                                        loadUsers()
+                                        loadStats()
+                                    }
+                                }.start()
                             }
-                        }.start()
+                            .setNegativeButton("Cancel", null)
+                            .show()
                     }
                 }
             }.start()
         }
 
-        btnRefreshUsers.setOnClickListener { refreshUsers() }
+        fun loadListings() {
+            setActiveTab(false)
+            tvLabel.text             = "Listings — tap to remove"
+            progressAdmin.visibility = View.VISIBLE
+            lvContent.visibility     = View.GONE
+            tvEmpty.visibility       = View.GONE
+
+            Thread {
+                val listings = db.getAllListingsForAdmin()
+                runOnUiThread {
+                    progressAdmin.visibility = View.GONE
+
+                    if (listings.isEmpty()) {
+                        tvEmpty.visibility = View.VISIBLE
+                        tvEmpty.text       = "No listings yet."
+                        return@runOnUiThread
+                    }
+
+                    val displayList = listings.map { listing ->
+                        val statusIcon = when (listing.status) {
+                            "ACTIVE"  -> "🟢"
+                            "REMOVED" -> "🔴"
+                            else      -> "⚪"
+                        }
+                        "$statusIcon ${listing.title}\n$${String.format("%.2f", listing.price)} | ${listing.condition} | ${listing.category}"
+                    }
+
+                    lvContent.adapter = ArrayAdapter(
+                        this, android.R.layout.simple_list_item_1, displayList
+                    )
+                    lvContent.visibility = View.VISIBLE
+
+                    lvContent.setOnItemClickListener { _, _, position, _ ->
+                        val listing = listings[position]
+
+                        if (listing.status == "REMOVED") {
+                            Toast.makeText(this, "Already removed", Toast.LENGTH_SHORT).show()
+                            return@setOnItemClickListener
+                        }
+
+                        AlertDialog.Builder(this)
+                            .setTitle("Remove Listing")
+                            .setMessage(
+                                "Title: ${listing.title}\nPrice: $${String.format("%.2f", listing.price)}\nCondition: ${listing.condition}\n\nRemove this listing? Buyers will no longer see it."
+                            )
+                            .setPositiveButton("Remove") { _, _ ->
+                                Thread {
+                                    db.markListingRemoved(listing.id)
+                                    runOnUiThread {
+                                        Toast.makeText(this, "Listing removed", Toast.LENGTH_SHORT).show()
+                                        loadListings()
+                                        loadStats()
+                                    }
+                                }.start()
+                            }
+                            .setNegativeButton("Cancel", null)
+                            .show()
+                    }
+                }
+            }.start()
+        }
+
+        btnTabUsers.setOnClickListener    { loadUsers() }
+        btnTabListings.setOnClickListener { loadListings() }
 
         btnAdminLogout.setOnClickListener {
             Session.userId    = -1L
@@ -77,6 +186,8 @@ class AdminDashboardActivity : AppCompatActivity() {
             finish()
         }
 
-        refreshUsers()
+        // Load stats and default tab
+        loadStats()
+        loadUsers()
     }
 }

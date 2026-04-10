@@ -14,12 +14,13 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(
 ) {
     companion object {
         private const val DB_NAME    = "MonitorMarketplace.db"
-        private const val DB_VERSION = 2
+        private const val DB_VERSION = 5
 
-        private const val T_USERS    = "users"
-        private const val T_LISTINGS = "listings"
-        private const val T_CART     = "cart_items"
-        private const val T_ORDERS   = "orders"
+        private const val T_USERS       = "users"
+        private const val T_LISTINGS    = "listings"
+        private const val T_CART        = "cart_items"
+        private const val T_ORDERS      = "orders"
+        private const val T_ORDER_ITEMS = "order_items"
 
         private const val COL_ID = "id"
 
@@ -38,6 +39,7 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(
         private const val L_SCREEN_SIZE = "screenSize"
         private const val L_RESOLUTION  = "resolution"
         private const val L_CONDITION   = "condition"
+        private const val L_CATEGORY    = "category"
         private const val L_PRICE       = "price"
         private const val L_PHOTO_URI   = "photoUri"
         private const val L_STATUS      = "status"
@@ -54,6 +56,12 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(
         private const val O_SHIPPING = "shippingInfo"
         private const val O_PAYMENT  = "paymentMethod"
         private const val O_CREATED  = "createdAt"
+
+        // order items
+        private const val OI_ORDER_ID = "orderId"
+        private const val OI_TITLE    = "title"
+        private const val OI_PRICE    = "price"
+        private const val OI_QTY      = "quantity"
     }
 
     override fun onCreate(db: SQLiteDatabase) {
@@ -78,9 +86,10 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(
                 $L_SCREEN_SIZE TEXT NOT NULL,
                 $L_RESOLUTION  TEXT NOT NULL,
                 $L_CONDITION   TEXT NOT NULL,
+                $L_CATEGORY    TEXT NOT NULL DEFAULT 'General',
                 $L_PRICE       REAL NOT NULL,
                 $L_PHOTO_URI   TEXT,
-                $L_STATUS      TEXT NOT NULL,
+                $L_STATUS      TEXT NOT NULL DEFAULT 'ACTIVE',
                 $L_CREATED_AT  INTEGER NOT NULL,
                 FOREIGN KEY($L_SELLER_ID) REFERENCES $T_USERS($COL_ID)
             )
@@ -99,27 +108,39 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(
 
         db.execSQL("""
             CREATE TABLE $T_ORDERS (
-                $COL_ID    INTEGER PRIMARY KEY AUTOINCREMENT,
-                $O_USER_ID INTEGER NOT NULL,
-                $O_TOTAL   REAL NOT NULL,
+                $COL_ID     INTEGER PRIMARY KEY AUTOINCREMENT,
+                $O_USER_ID  INTEGER NOT NULL,
+                $O_TOTAL    REAL NOT NULL,
                 $O_SHIPPING TEXT NOT NULL,
                 $O_PAYMENT  TEXT NOT NULL,
                 $O_CREATED  INTEGER NOT NULL
             )
         """.trimIndent())
 
-        // Seed admin account
-        val cv = ContentValues().apply {
+        db.execSQL("""
+            CREATE TABLE $T_ORDER_ITEMS (
+                $COL_ID       INTEGER PRIMARY KEY AUTOINCREMENT,
+                $OI_ORDER_ID  INTEGER NOT NULL,
+                $OI_TITLE     TEXT NOT NULL,
+                $OI_PRICE     REAL NOT NULL,
+                $OI_QTY       INTEGER NOT NULL,
+                FOREIGN KEY($OI_ORDER_ID) REFERENCES $T_ORDERS($COL_ID)
+            )
+        """.trimIndent())
+
+        // Seed admin
+        val adminCv = ContentValues().apply {
             put(U_NAME,     "Admin")
             put(U_EMAIL,    "admin@mavs.uta.edu")
             put(U_PASSWORD, "admin123")
             put(U_ROLE,     "ADMIN")
             put(U_DISABLED, 0)
         }
-        db.insert(T_USERS, null, cv)
+        db.insert(T_USERS, null, adminCv)
     }
 
     override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
+        db.execSQL("DROP TABLE IF EXISTS $T_ORDER_ITEMS")
         db.execSQL("DROP TABLE IF EXISTS $T_ORDERS")
         db.execSQL("DROP TABLE IF EXISTS $T_CART")
         db.execSQL("DROP TABLE IF EXISTS $T_LISTINGS")
@@ -144,6 +165,15 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(
         val cursor = readableDatabase.query(
             T_USERS, null,
             "$U_EMAIL=?", arrayOf(email.lowercase()),
+            null, null, null
+        )
+        return cursor.use { if (it.moveToFirst()) cursorToUser(it) else null }
+    }
+
+    fun getUserById(userId: Long): User? {
+        val cursor = readableDatabase.query(
+            T_USERS, null,
+            "$COL_ID=?", arrayOf(userId.toString()),
             null, null, null
         )
         return cursor.use { if (it.moveToFirst()) cursorToUser(it) else null }
@@ -175,6 +205,11 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(
         return writableDatabase.update(T_USERS, cv, "$COL_ID=?", arrayOf(userId.toString()))
     }
 
+    fun updateUserProfile(userId: Long, name: String): Int {
+        val cv = ContentValues().apply { put(U_NAME, name) }
+        return writableDatabase.update(T_USERS, cv, "$COL_ID=?", arrayOf(userId.toString()))
+    }
+
     private fun cursorToUser(c: Cursor) = User(
         id       = c.getLong(c.getColumnIndexOrThrow(COL_ID)),
         name     = c.getString(c.getColumnIndexOrThrow(U_NAME)),
@@ -195,6 +230,7 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(
             put(L_SCREEN_SIZE, listing.screenSize)
             put(L_RESOLUTION,  listing.resolution)
             put(L_CONDITION,   listing.condition)
+            put(L_CATEGORY,    listing.category)
             put(L_PRICE,       listing.price)
             put(L_PHOTO_URI,   listing.photoUri)
             put(L_STATUS,      listing.status)
@@ -221,6 +257,14 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(
         return cursor.use { toListings(it) }
     }
 
+    fun getAllListingsForAdmin(): List<Listing> {
+        val cursor = readableDatabase.query(
+            T_LISTINGS, null, null, null, null, null,
+            "$L_CREATED_AT DESC"
+        )
+        return cursor.use { toListings(it) }
+    }
+
     fun getListingById(listingId: Long): Listing? {
         val cursor = readableDatabase.query(
             T_LISTINGS, null,
@@ -238,6 +282,7 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(
             put(L_SCREEN_SIZE, listing.screenSize)
             put(L_RESOLUTION,  listing.resolution)
             put(L_CONDITION,   listing.condition)
+            put(L_CATEGORY,    listing.category)
             put(L_PRICE,       listing.price)
             put(L_PHOTO_URI,   listing.photoUri)
             put(L_STATUS,      listing.status)
@@ -247,6 +292,11 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(
 
     fun deleteListing(listingId: Long): Int {
         return writableDatabase.delete(T_LISTINGS, "$COL_ID=?", arrayOf(listingId.toString()))
+    }
+
+    fun markListingRemoved(listingId: Long): Int {
+        val cv = ContentValues().apply { put(L_STATUS, "REMOVED") }
+        return writableDatabase.update(T_LISTINGS, cv, "$COL_ID=?", arrayOf(listingId.toString()))
     }
 
     private fun toListings(cursor: Cursor): List<Listing> {
@@ -264,6 +314,7 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(
         screenSize  = c.getString(c.getColumnIndexOrThrow(L_SCREEN_SIZE)),
         resolution  = c.getString(c.getColumnIndexOrThrow(L_RESOLUTION)),
         condition   = c.getString(c.getColumnIndexOrThrow(L_CONDITION)),
+        category    = c.getString(c.getColumnIndexOrThrow(L_CATEGORY)),
         price       = c.getDouble(c.getColumnIndexOrThrow(L_PRICE)),
         photoUri    = c.getString(c.getColumnIndexOrThrow(L_PHOTO_URI)),
         status      = c.getString(c.getColumnIndexOrThrow(L_STATUS)),
@@ -358,7 +409,59 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(
             put(O_CREATED,  System.currentTimeMillis())
         }
         val orderId = writableDatabase.insert(T_ORDERS, null, cv)
-        if (orderId > 0) clearCart(userId)
+
+        if (orderId > 0) {
+            for (ci in items) {
+                val listing = getListingById(ci.listingId) ?: continue
+                val itemCv = ContentValues().apply {
+                    put(OI_ORDER_ID, orderId)
+                    put(OI_TITLE,    listing.title)
+                    put(OI_PRICE,    listing.price)
+                    put(OI_QTY,      ci.quantity)
+                }
+                writableDatabase.insert(T_ORDER_ITEMS, null, itemCv)
+            }
+            clearCart(userId)
+        }
         return orderId
+    }
+
+    fun getOrdersByUser(userId: Long): List<Map<String, Any>> {
+        val cursor = readableDatabase.query(
+            T_ORDERS, null,
+            "$O_USER_ID=?", arrayOf(userId.toString()),
+            null, null, "$O_CREATED DESC"
+        )
+        return cursor.use {
+            val out = mutableListOf<Map<String, Any>>()
+            while (it.moveToNext()) {
+                out.add(mapOf(
+                    "id"      to it.getLong(it.getColumnIndexOrThrow(COL_ID)),
+                    "total"   to it.getDouble(it.getColumnIndexOrThrow(O_TOTAL)),
+                    "payment" to it.getString(it.getColumnIndexOrThrow(O_PAYMENT)),
+                    "created" to it.getLong(it.getColumnIndexOrThrow(O_CREATED))
+                ))
+            }
+            out
+        }
+    }
+
+    fun getOrderItems(orderId: Long): List<Map<String, Any>> {
+        val cursor = readableDatabase.query(
+            T_ORDER_ITEMS, null,
+            "$OI_ORDER_ID=?", arrayOf(orderId.toString()),
+            null, null, null
+        )
+        return cursor.use {
+            val out = mutableListOf<Map<String, Any>>()
+            while (it.moveToNext()) {
+                out.add(mapOf(
+                    "title"    to it.getString(it.getColumnIndexOrThrow(OI_TITLE)),
+                    "price"    to it.getDouble(it.getColumnIndexOrThrow(OI_PRICE)),
+                    "quantity" to it.getInt(it.getColumnIndexOrThrow(OI_QTY))
+                ))
+            }
+            out
+        }
     }
 }

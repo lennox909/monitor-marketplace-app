@@ -1,31 +1,92 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:gravity="center"
-    android:padding="32dp"
-    android:background="#F5F7FB">
+    android:background="#F5F7FB"
+    android:padding="24dp">
 
-    <TextView
-        android:id="@+id/tvOrderId"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Order Confirmed!"
-        android:textSize="22sp"
-        android:textStyle="bold"
-        android:textColor="#1F2A44"
-        android:gravity="center"
-        android:layout_marginBottom="24dp" />
+        android:orientation="vertical"
+        android:gravity="center_horizontal">
 
-    <Button
-        android:id="@+id/btnContinue"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Continue Shopping"
-        android:textAllCaps="false"
-        android:textStyle="bold"
-        android:textColor="#FFFFFF"
-        android:backgroundTint="#F97316" />
+        <!-- Confirmation title -->
+        <TextView
+            android:id="@+id/tvOrderId"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Order Confirmed!"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            android:textColor="#1F2A44"
+            android:gravity="center"
+            android:layout_marginBottom="24dp" />
 
-</LinearLayout>
+        <!-- Loading -->
+        <ProgressBar
+            android:id="@+id/progressConfirmation"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            android:layout_marginBottom="16dp" />
+
+        <!-- Order summary card -->
+        <androidx.cardview.widget.CardView
+            xmlns:app="http://schemas.android.com/apk/res-auto"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="4dp"
+            android:layout_marginBottom="16dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="20dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Order Summary"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:textColor="#1F2A44"
+                    android:layout_marginBottom="12dp" />
+
+                <TextView
+                    android:id="@+id/tvOrderSummary"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textSize="14sp"
+                    android:textColor="#374151"
+                    android:lineSpacingExtra="4dp" />
+
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+
+        <!-- Total -->
+        <TextView
+            android:id="@+id/tvOrderTotal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:textColor="#F97316"
+            android:gravity="center"
+            android:layout_marginBottom="24dp" />
+
+        <!-- Continue button -->
+        <Button
+            android:id="@+id/btnContinue"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Continue Shopping"
+            android:textAllCaps="false"
+            android:textStyle="bold"
+            android:textColor="#FFFFFF"
+            android:backgroundTint="#F97316" />
+
+    </LinearLayout>
+</ScrollView>

@@ -73,6 +73,20 @@
             android:layout_height="wrap_content"
             android:layout_marginBottom="12dp" />
 
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Category"
+            android:textSize="13sp"
+            android:textColor="#374151"
+            android:layout_marginBottom="4dp" />
+
+        <Spinner
+            android:id="@+id/spCategory"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="12dp" />
+
         <EditText
             android:id="@+id/etPrice"
             android:layout_width="match_parent"
@@ -81,7 +95,6 @@
             android:inputType="numberDecimal"
             android:layout_marginBottom="16dp" />
 
-        <!-- Image section -->
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -90,7 +103,6 @@
             android:textColor="#374151"
             android:layout_marginBottom="4dp" />
 
-        <!-- Image preview (hidden until photo selected) -->
         <ImageView
             android:id="@+id/ivListingImage"
             android:layout_width="match_parent"

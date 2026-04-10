@@ -8,22 +8,30 @@ import androidx.appcompat.app.AppCompatActivity
 import com.example.myfirstapp.R
 import com.example.myfirstapp.data.DatabaseHelper
 import com.example.myfirstapp.model.Listing
+import java.io.File
+import java.io.FileOutputStream
 
 class AddEditListingActivity : AppCompatActivity() {
 
     private lateinit var db: DatabaseHelper
     private var editId: Long = -1
-    private var selectedImageUri: Uri? = null
+    private var savedImagePath: String? = null
 
-    // Image picker launcher
     private val pickImage = registerForActivityResult(
         ActivityResultContracts.GetContent()
     ) { uri: Uri? ->
         if (uri != null) {
-            selectedImageUri = uri
             try {
+                val fileName     = "listing_${System.currentTimeMillis()}.jpg"
+                val file         = File(filesDir, fileName)
+                val inputStream  = contentResolver.openInputStream(uri)
+                val outputStream = FileOutputStream(file)
+                inputStream?.copyTo(outputStream)
+                inputStream?.close()
+                outputStream.close()
+                savedImagePath = file.absolutePath
                 val ivImage = findViewById<ImageView>(R.id.ivListingImage)
-                ivImage.setImageURI(uri)
+                ivImage.setImageURI(Uri.fromFile(file))
                 ivImage.visibility = android.view.View.VISIBLE
                 findViewById<TextView>(R.id.tvImageHint).text = "Image selected"
             } catch (e: Exception) {
@@ -45,6 +53,7 @@ class AddEditListingActivity : AppCompatActivity() {
         val etScreenSize  = findViewById<EditText>(R.id.etScreenSize)
         val etResolution  = findViewById<EditText>(R.id.etResolution)
         val spCondition   = findViewById<Spinner>(R.id.spCondition)
+        val spCategory    = findViewById<Spinner>(R.id.spCategory)
         val etPrice       = findViewById<EditText>(R.id.etPrice)
         val btnPickImage  = findViewById<Button>(R.id.btnPickImage)
         val ivImage       = findViewById<ImageView>(R.id.ivListingImage)
@@ -55,7 +64,11 @@ class AddEditListingActivity : AppCompatActivity() {
             this, android.R.layout.simple_spinner_dropdown_item, conditions
         )
 
-        // Pre-fill if editing
+        val categories = listOf("Gaming", "Office", "4K", "Ultrawide", "General")
+        spCategory.adapter = ArrayAdapter(
+            this, android.R.layout.simple_spinner_dropdown_item, categories
+        )
+
         if (editId > 0) {
             val listing = db.getListingById(editId)
             if (listing != null) {
@@ -65,14 +78,14 @@ class AddEditListingActivity : AppCompatActivity() {
                 etScreenSize.setText(listing.screenSize)
                 etResolution.setText(listing.resolution)
                 etPrice.setText(listing.price.toString())
-                val idx = conditions.indexOf(listing.condition)
-                if (idx >= 0) spCondition.setSelection(idx)
-
-                // Load existing photo safely
+                val condIdx = conditions.indexOf(listing.condition)
+                if (condIdx >= 0) spCondition.setSelection(condIdx)
+                val catIdx = categories.indexOf(listing.category)
+                if (catIdx >= 0) spCategory.setSelection(catIdx)
                 if (!listing.photoUri.isNullOrEmpty()) {
+                    savedImagePath = listing.photoUri
                     try {
-                        selectedImageUri = Uri.parse(listing.photoUri)
-                        ivImage.setImageURI(selectedImageUri)
+                        ivImage.setImageURI(Uri.fromFile(File(listing.photoUri)))
                         ivImage.visibility = android.view.View.VISIBLE
                         findViewById<TextView>(R.id.tvImageHint).text = "Image selected"
                     } catch (e: Exception) {
@@ -82,10 +95,7 @@ class AddEditListingActivity : AppCompatActivity() {
             }
         }
 
-        // Open gallery picker
-        btnPickImage.setOnClickListener {
-            pickImage.launch("image/*")
-        }
+        btnPickImage.setOnClickListener { pickImage.launch("image/*") }
 
         btnSave.setOnClickListener {
             val title      = etTitle.text.toString().trim()
@@ -94,6 +104,7 @@ class AddEditListingActivity : AppCompatActivity() {
             val screenSize = etScreenSize.text.toString().trim()
             val resolution = etResolution.text.toString().trim()
             val condition  = spCondition.selectedItem.toString()
+            val category   = spCategory.selectedItem.toString()
             val priceStr   = etPrice.text.toString().trim()
 
             if (title.isEmpty() || desc.isEmpty() || brand.isEmpty() ||
@@ -117,8 +128,9 @@ class AddEditListingActivity : AppCompatActivity() {
                 screenSize  = screenSize,
                 resolution  = resolution,
                 condition   = condition,
+                category    = category,
                 price       = price,
-                photoUri    = selectedImageUri?.toString()
+                photoUri    = savedImagePath
             )
 
             if (editId > 0) {

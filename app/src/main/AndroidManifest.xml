@@ -1,9 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <!-- Required to read images from gallery on Android 13+ -->
     <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
-    <!-- Required for Android 12 and below -->
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"
         android:maxSdkVersion="32" />
 
@@ -13,8 +11,23 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.MyFirstApp">
 
-        <!-- adjustResize makes the layout shrink when keyboard opens
-             so ScrollView screens stay scrollable and fields stay visible -->
+        <activity android:name=".userinterface.MyOrdersActivity" />
+        <activity android:name=".userinterface.EditProfileActivity"
+            android:windowSoftInputMode="adjustResize" />
+        <activity android:name=".userinterface.SettingsActivity" />
+        <activity android:name=".userinterface.ProfileActivity" />
+        <activity android:name=".userinterface.OrderConfirmationActivity" />
+        <activity android:name=".userinterface.CheckoutActivity"
+            android:windowSoftInputMode="adjustResize" />
+        <activity android:name=".userinterface.CartActivity" />
+        <activity android:name=".userinterface.ListingDetailActivity" />
+        <activity android:name=".userinterface.AddEditListingActivity"
+            android:windowSoftInputMode="adjustResize" />
+        <activity android:name=".userinterface.AdminDashboardActivity" />
+        <activity android:name=".userinterface.MainActivity"
+            android:windowSoftInputMode="adjustResize" />
+        <activity android:name=".userinterface.RegisterActivity"
+            android:windowSoftInputMode="adjustResize" />
 
         <activity
             android:name=".userinterface.LoginActivity"
@@ -25,29 +38,6 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
-        <activity
-            android:name=".userinterface.RegisterActivity"
-            android:windowSoftInputMode="adjustResize" />
-
-        <activity
-            android:name=".userinterface.AddEditListingActivity"
-            android:windowSoftInputMode="adjustResize" />
-
-        <activity
-            android:name=".userinterface.CheckoutActivity"
-            android:windowSoftInputMode="adjustResize" />
-
-        <activity
-            android:name=".userinterface.MainActivity"
-            android:windowSoftInputMode="adjustResize" />
-
-        <activity android:name=".userinterface.ListingDetailActivity" />
-        <activity android:name=".userinterface.CartActivity" />
-        <activity android:name=".userinterface.OrderConfirmationActivity" />
-        <activity android:name=".userinterface.AdminDashboardActivity" />
-        <activity android:name=".userinterface.ProfileActivity" />
-        <activity android:name=".userinterface.SettingsActivity" />
 
     </application>
 </manifest>

@@ -9,6 +9,7 @@ data class Listing(
     val screenSize: String,
     val resolution: String,
     val condition: String,
+    val category: String,
     val price: Double,
     val photoUri: String? = null,
     val status: String = "ACTIVE",

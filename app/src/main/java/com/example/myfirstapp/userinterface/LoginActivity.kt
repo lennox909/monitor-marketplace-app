@@ -31,11 +31,9 @@ class LoginActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
 
-            // Disable button while logging in
             btnLogin.isEnabled = false
             btnLogin.text      = "Logging in..."
 
-            // DB call off main thread
             Thread {
                 val user = db.login(email, password)
 
@@ -53,22 +51,16 @@ class LoginActivity : AppCompatActivity() {
                         return@runOnUiThread
                     }
 
-                    Session.userId = user.id
-                    Session.role   = user.role
+                    Session.userId    = user.id
+                    Session.role      = user.role
+                    Session.isBuyMode = true  // everyone starts in buy mode, switch available on dashboard
 
                     when (user.role) {
-                        "ADMIN"  -> {
+                        "ADMIN" -> {
                             Session.isBuyMode = false
                             startActivity(Intent(this, AdminDashboardActivity::class.java))
                         }
-                        "SELLER" -> {
-                            Session.isBuyMode = false
-                            startActivity(Intent(this, MainActivity::class.java))
-                        }
-                        else     -> {
-                            Session.isBuyMode = true
-                            startActivity(Intent(this, MainActivity::class.java))
-                        }
+                        else -> startActivity(Intent(this, MainActivity::class.java))
                     }
                     finish()
                 }

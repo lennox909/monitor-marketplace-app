@@ -6,37 +6,116 @@
     android:padding="16dp"
     android:background="#F5F7FB">
 
+    <!-- Title -->
     <TextView
-        android:id="@+id/tvAdmin"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Admin Dashboard"
-        android:textSize="24sp"
+        android:textSize="22sp"
         android:textStyle="bold"
         android:textColor="#1F2A44"
-        android:layout_marginBottom="4dp" />
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Tap a user to enable or disable their account"
-        android:textSize="13sp"
-        android:textColor="#6B7280"
-        android:layout_marginBottom="16dp" />
-
-    <Button
-        android:id="@+id/btnRefreshUsers"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Refresh Users"
-        android:textAllCaps="false"
-        android:textStyle="bold"
-        android:textColor="#FFFFFF"
-        android:backgroundTint="#F97316"
         android:layout_marginBottom="12dp" />
 
+    <!-- Stats card -->
+    <androidx.cardview.widget.CardView
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:cardCornerRadius="12dp"
+        app:cardElevation="4dp"
+        android:layout_marginBottom="16dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Overview"
+                android:textSize="13sp"
+                android:textStyle="bold"
+                android:textColor="#6B7280"
+                android:layout_marginBottom="6dp" />
+
+            <TextView
+                android:id="@+id/tvStats"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Loading..."
+                android:textSize="15sp"
+                android:textColor="#1F2A44" />
+
+        </LinearLayout>
+    </androidx.cardview.widget.CardView>
+
+    <!-- Tab buttons -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginBottom="8dp">
+
+        <Button
+            android:id="@+id/btnTabUsers"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Users"
+            android:textAllCaps="false"
+            android:textStyle="bold"
+            android:textColor="#FFFFFF"
+            android:backgroundTint="#F97316"
+            android:layout_marginEnd="6dp" />
+
+        <Button
+            android:id="@+id/btnTabListings"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Listings"
+            android:textAllCaps="false"
+            android:textStyle="bold"
+            android:textColor="#1F2A44"
+            android:backgroundTint="#E5E7EB" />
+
+    </LinearLayout>
+
+    <!-- Content label -->
+    <TextView
+        android:id="@+id/tvContentLabel"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Users — tap to enable / disable"
+        android:textSize="12sp"
+        android:textColor="#6B7280"
+        android:layout_marginBottom="6dp" />
+
+    <!-- Loading -->
+    <ProgressBar
+        android:id="@+id/progressAdmin"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:visibility="gone" />
+
+    <!-- Empty state -->
+    <TextView
+        android:id="@+id/tvAdminEmpty"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Nothing here."
+        android:gravity="center"
+        android:textColor="#6B7280"
+        android:textSize="14sp"
+        android:visibility="gone"
+        android:layout_marginTop="40dp" />
+
+    <!-- List -->
     <ListView
-        android:id="@+id/lvUsers"
+        android:id="@+id/lvContent"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
