@@ -11,33 +11,51 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.MyFirstApp">
 
-        <activity android:name=".userinterface.MyOrdersActivity" />
-        <activity android:name=".userinterface.EditProfileActivity"
-            android:windowSoftInputMode="adjustResize" />
-        <activity android:name=".userinterface.SettingsActivity" />
-        <activity android:name=".userinterface.ProfileActivity" />
-        <activity android:name=".userinterface.OrderConfirmationActivity" />
-        <activity android:name=".userinterface.CheckoutActivity"
-            android:windowSoftInputMode="adjustResize" />
-        <activity android:name=".userinterface.CartActivity" />
-        <activity android:name=".userinterface.ListingDetailActivity" />
-        <activity android:name=".userinterface.AddEditListingActivity"
-            android:windowSoftInputMode="adjustResize" />
-        <activity android:name=".userinterface.AdminDashboardActivity" />
-        <activity android:name=".userinterface.MainActivity"
-            android:windowSoftInputMode="adjustResize" />
-        <activity android:name=".userinterface.RegisterActivity"
-            android:windowSoftInputMode="adjustResize" />
-
+        <!-- Splash is now the launcher -->
         <activity
-            android:name=".userinterface.LoginActivity"
+            android:name=".userinterface.SplashActivity"
             android:exported="true"
-            android:windowSoftInputMode="adjustResize">
+            android:theme="@style/Theme.MyFirstApp.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <activity
+            android:name=".userinterface.LoginActivity"
+            android:windowSoftInputMode="adjustResize" />
+
+        <activity
+            android:name=".userinterface.RegisterActivity"
+            android:windowSoftInputMode="adjustResize" />
+
+        <activity
+            android:name=".userinterface.MainActivity"
+            android:windowSoftInputMode="adjustResize" />
+
+        <activity android:name=".userinterface.AdminDashboardActivity" />
+
+        <activity
+            android:name=".userinterface.AddEditListingActivity"
+            android:windowSoftInputMode="adjustResize" />
+
+        <activity android:name=".userinterface.ListingDetailActivity" />
+        <activity android:name=".userinterface.CartActivity" />
+
+        <activity
+            android:name=".userinterface.CheckoutActivity"
+            android:windowSoftInputMode="adjustResize" />
+
+        <activity android:name=".userinterface.OrderConfirmationActivity" />
+        <activity android:name=".userinterface.MyOrdersActivity" />
+        <activity android:name=".userinterface.ProfileActivity" />
+
+        <activity
+            android:name=".userinterface.EditProfileActivity"
+            android:windowSoftInputMode="adjustResize" />
+
+        <activity android:name=".userinterface.SettingsActivity" />
 
     </application>
 </manifest>

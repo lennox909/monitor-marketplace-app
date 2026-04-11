@@ -1,6 +1,5 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <style name="Theme.MyFirstApp" parent="Theme.MaterialComponents.DayNight.NoActionBar">
-        <!-- Smooth slide transitions between screens -->
         <item name="android:windowAnimationStyle">@style/WindowAnimationStyle</item>
     </style>
 
@@ -9,5 +8,10 @@
         <item name="android:activityOpenExitAnimation">@anim/slide_out_left</item>
         <item name="android:activityCloseEnterAnimation">@anim/slide_in_left</item>
         <item name="android:activityCloseExitAnimation">@anim/slide_out_right</item>
+    </style>
+
+    <style name="Theme.MyFirstApp.NoActionBar" parent="Theme.MyFirstApp">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
     </style>
 </resources>
