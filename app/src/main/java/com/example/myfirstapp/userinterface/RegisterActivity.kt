@@ -22,22 +22,14 @@ class RegisterActivity : AppCompatActivity() {
         val etEmail           = findViewById<EditText>(R.id.etEmail)
         val etPassword        = findViewById<EditText>(R.id.etPassword)
         val etConfirmPassword = findViewById<EditText>(R.id.etConfirmPassword)
-        val spRole            = findViewById<Spinner>(R.id.spRole)
         val btnRegister       = findViewById<Button>(R.id.btnRegister)
         val btnBackToLogin    = findViewById<Button>(R.id.btnBackToLogin)
-
-        spRole.adapter = ArrayAdapter(
-            this,
-            android.R.layout.simple_spinner_dropdown_item,
-            listOf("BUYER", "SELLER")
-        )
 
         btnRegister.setOnClickListener {
             val name            = etName.text.toString().trim()
             val email           = etEmail.text.toString().trim().lowercase()
             val password        = etPassword.text.toString()
             val confirmPassword = etConfirmPassword.text.toString()
-            val role            = spRole.selectedItem.toString()
 
             if (name.isEmpty() || email.isEmpty() || password.isEmpty() || confirmPassword.isEmpty()) {
                 Toast.makeText(this, "All fields are required", Toast.LENGTH_SHORT).show()
@@ -64,7 +56,11 @@ class RegisterActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
 
-            val id = db.addUser(User(name = name, email = email, password = password, role = role))
+            // Everyone registers as USER — they can toggle buy/sell from dashboard
+            val id = db.addUser(
+                User(name = name, email = email, password = password, role = "USER")
+            )
+
             if (id <= 0) {
                 Toast.makeText(this, "Registration failed, try again", Toast.LENGTH_SHORT).show()
             } else {

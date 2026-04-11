@@ -24,8 +24,8 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Sign in to continue"
-            android:textSize="15sp"
+            android:text="Buy and sell monitors at UTA"
+            android:textSize="14sp"
             android:textColor="#6B7280"
             android:layout_marginTop="8dp"
             android:layout_marginBottom="28dp" />
@@ -54,7 +54,7 @@
                     android:id="@+id/etEmail"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="Enter your email"
+                    android:hint="Enter your UTA email"
                     android:inputType="textEmailAddress"
                     android:layout_marginTop="6dp"
                     android:layout_marginBottom="14dp" />

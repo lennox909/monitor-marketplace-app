@@ -53,7 +53,7 @@ class LoginActivity : AppCompatActivity() {
 
                     Session.userId    = user.id
                     Session.role      = user.role
-                    Session.isBuyMode = true  // everyone starts in buy mode, switch available on dashboard
+                    Session.isBuyMode = true // everyone starts in buy mode
 
                     when (user.role) {
                         "ADMIN" -> {

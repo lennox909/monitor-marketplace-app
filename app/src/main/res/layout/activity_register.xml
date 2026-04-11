@@ -19,7 +19,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Create your account"
-            android:textSize="30sp"
+            android:textSize="28sp"
             android:textStyle="bold"
             android:textColor="#18243D" />
 
@@ -27,7 +27,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Register using your UTA student email"
-            android:textSize="15sp"
+            android:textSize="14sp"
             android:textColor="#6B7280"
             android:layout_marginTop="8dp"
             android:layout_marginBottom="24dp" />
@@ -111,21 +111,6 @@
                     android:hint="Re-enter password"
                     android:inputType="textPassword"
                     android:layout_marginTop="6dp"
-                    android:layout_marginBottom="16dp" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Role"
-                    android:textSize="14sp"
-                    android:textStyle="bold"
-                    android:textColor="#374151" />
-
-                <Spinner
-                    android:id="@+id/spRole"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
                     android:layout_marginBottom="24dp" />
 
                 <Button
