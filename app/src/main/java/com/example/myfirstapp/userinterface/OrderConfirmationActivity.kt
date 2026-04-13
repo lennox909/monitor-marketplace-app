@@ -24,7 +24,7 @@ class OrderConfirmationActivity : AppCompatActivity() {
         progressBar.visibility = View.VISIBLE
 
         Thread {
-            val db     = DatabaseHelper(this)
+            val db     = DatabaseHelper.getInstance(this)
             val items  = db.getOrderItems(orderId)
             val orders = db.getOrdersByUser(Session.userId)
             val order  = orders.firstOrNull { (it["id"] as Long) == orderId }

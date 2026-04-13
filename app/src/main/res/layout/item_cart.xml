@@ -42,7 +42,9 @@
                 android:layout_height="40dp"
                 android:text="-"
                 android:textSize="18sp"
-                android:padding="0dp" />
+                android:padding="0dp"
+                android:textColor="#FFFFFF"
+                android:backgroundTint="#F97316" />
 
             <TextView
                 android:id="@+id/tvQty"
@@ -58,7 +60,9 @@
                 android:layout_height="40dp"
                 android:text="+"
                 android:textSize="18sp"
-                android:padding="0dp" />
+                android:padding="0dp"
+                android:textColor="#FFFFFF"
+                android:backgroundTint="#F97316" />
 
             <View
                 android:layout_width="0dp"

@@ -44,7 +44,7 @@ class AddEditListingActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_add_edit_listing)
 
-        db     = DatabaseHelper(this)
+        db     = DatabaseHelper.getInstance(this)
         editId = intent.getLongExtra("EDIT_ID", -1)
 
         val etTitle       = findViewById<EditText>(R.id.etTitle)

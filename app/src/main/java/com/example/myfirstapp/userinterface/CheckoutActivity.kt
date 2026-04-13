@@ -15,7 +15,7 @@ class CheckoutActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_checkout)
 
-        db = DatabaseHelper(this)
+        db = DatabaseHelper.getInstance(this)
 
         val etFirstName  = findViewById<EditText>(R.id.etFirstName)
         val etLastName   = findViewById<EditText>(R.id.etLastName)

@@ -5,6 +5,7 @@ data class User(
     val name: String,
     val email: String,
     val password: String,
-    val role: String,           // BUYER, SELLER, ADMIN
-    val disabled: Boolean = false
+    val role: String,
+    val disabled: Boolean = false,
+    val avatarColor: String = "#F97316"  // default orange
 )

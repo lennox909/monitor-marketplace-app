@@ -129,8 +129,8 @@
         android:text="Logout"
         android:textAllCaps="false"
         android:textStyle="bold"
-        android:textColor="#1F2A44"
-        android:backgroundTint="#E5E7EB"
+        android:textColor="#FFFFFF"
+        android:backgroundTint="#F97316"
         android:layout_marginTop="12dp" />
 
 </LinearLayout>

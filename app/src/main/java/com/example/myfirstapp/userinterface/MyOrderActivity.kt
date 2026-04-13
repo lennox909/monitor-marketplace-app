@@ -22,7 +22,7 @@ class MyOrdersActivity : AppCompatActivity() {
         progress.visibility = View.VISIBLE
 
         Thread {
-            val db     = DatabaseHelper(this)
+            val db     = DatabaseHelper.getInstance(this)
             val orders = db.getOrdersByUser(Session.userId)
 
             runOnUiThread {

@@ -18,7 +18,7 @@ class ListingDetailActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_listing_detail)
 
-        db        = DatabaseHelper(this)
+        db        = DatabaseHelper.getInstance(this)
         listingId = intent.getLongExtra("LISTING_ID", -1)
 
         val ivImage       = findViewById<ImageView>(R.id.ivListingImage)

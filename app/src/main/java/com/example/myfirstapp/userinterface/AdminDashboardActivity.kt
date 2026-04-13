@@ -17,7 +17,7 @@ class AdminDashboardActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_admin_dashboard)
 
-        db = DatabaseHelper(this)
+        db = DatabaseHelper.getInstance(this)
 
         val tvStats        = findViewById<TextView>(R.id.tvStats)
         val btnTabUsers    = findViewById<Button>(R.id.btnTabUsers)

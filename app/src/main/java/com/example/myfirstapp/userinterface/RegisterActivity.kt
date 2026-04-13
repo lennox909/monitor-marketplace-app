@@ -16,7 +16,7 @@ class RegisterActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_register)
 
-        db = DatabaseHelper(this)
+        db = DatabaseHelper.getInstance(this)
 
         val etName            = findViewById<EditText>(R.id.etName)
         val etEmail           = findViewById<EditText>(R.id.etEmail)

@@ -30,7 +30,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        db = DatabaseHelper(this)
+        db = DatabaseHelper.getInstance(this)
 
         val tvWelcome     = findViewById<TextView>(R.id.tvWelcome)
         val tvModeLabel   = findViewById<TextView>(R.id.tvModeLabel)

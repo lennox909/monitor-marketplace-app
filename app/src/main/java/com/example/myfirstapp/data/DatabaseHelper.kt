@@ -9,12 +9,12 @@ import com.example.myfirstapp.model.CartItem
 import com.example.myfirstapp.model.Listing
 import com.example.myfirstapp.model.User
 
-class DatabaseHelper(context: Context) : SQLiteOpenHelper(
-    context, DB_NAME, null, DB_VERSION
+class DatabaseHelper private constructor(context: Context) : SQLiteOpenHelper(
+    context.applicationContext, DB_NAME, null, DB_VERSION
 ) {
     companion object {
         private const val DB_NAME    = "MonitorMarketplace.db"
-        private const val DB_VERSION = 5
+        private const val DB_VERSION = 6
 
         private const val T_USERS       = "users"
         private const val T_LISTINGS    = "listings"
@@ -25,11 +25,12 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(
         private const val COL_ID = "id"
 
         // users
-        private const val U_NAME     = "name"
-        private const val U_EMAIL    = "email"
-        private const val U_PASSWORD = "password"
-        private const val U_ROLE     = "role"
-        private const val U_DISABLED = "disabled"
+        private const val U_NAME         = "name"
+        private const val U_EMAIL        = "email"
+        private const val U_PASSWORD     = "password"
+        private const val U_ROLE         = "role"
+        private const val U_DISABLED     = "disabled"
+        private const val U_AVATAR_COLOR = "avatarColor"
 
         // listings
         private const val L_SELLER_ID   = "sellerId"
@@ -62,17 +63,28 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(
         private const val OI_TITLE    = "title"
         private const val OI_PRICE    = "price"
         private const val OI_QTY      = "quantity"
+
+        // Singleton instance
+        @Volatile
+        private var instance: DatabaseHelper? = null
+
+        fun getInstance(context: Context): DatabaseHelper {
+            return instance ?: synchronized(this) {
+                instance ?: DatabaseHelper(context).also { instance = it }
+            }
+        }
     }
 
     override fun onCreate(db: SQLiteDatabase) {
         db.execSQL("""
             CREATE TABLE $T_USERS (
-                $COL_ID     INTEGER PRIMARY KEY AUTOINCREMENT,
-                $U_NAME     TEXT NOT NULL,
-                $U_EMAIL    TEXT NOT NULL UNIQUE,
-                $U_PASSWORD TEXT NOT NULL,
-                $U_ROLE     TEXT NOT NULL,
-                $U_DISABLED INTEGER NOT NULL DEFAULT 0
+                $COL_ID          INTEGER PRIMARY KEY AUTOINCREMENT,
+                $U_NAME          TEXT NOT NULL,
+                $U_EMAIL         TEXT NOT NULL UNIQUE,
+                $U_PASSWORD      TEXT NOT NULL,
+                $U_ROLE          TEXT NOT NULL,
+                $U_DISABLED      INTEGER NOT NULL DEFAULT 0,
+                $U_AVATAR_COLOR  TEXT NOT NULL DEFAULT '#F97316'
             )
         """.trimIndent())
 
@@ -130,11 +142,12 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(
 
         // Seed admin
         val adminCv = ContentValues().apply {
-            put(U_NAME,     "Admin")
-            put(U_EMAIL,    "admin@mavs.uta.edu")
-            put(U_PASSWORD, "admin123")
-            put(U_ROLE,     "ADMIN")
-            put(U_DISABLED, 0)
+            put(U_NAME,         "Admin")
+            put(U_EMAIL,        "admin@mavs.uta.edu")
+            put(U_PASSWORD,     "admin123")
+            put(U_ROLE,         "ADMIN")
+            put(U_DISABLED,     0)
+            put(U_AVATAR_COLOR, "#1F2A44")
         }
         db.insert(T_USERS, null, adminCv)
     }
@@ -152,11 +165,12 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(
 
     fun addUser(user: User): Long {
         val cv = ContentValues().apply {
-            put(U_NAME,     user.name)
-            put(U_EMAIL,    user.email.lowercase())
-            put(U_PASSWORD, user.password)
-            put(U_ROLE,     user.role)
-            put(U_DISABLED, 0)
+            put(U_NAME,         user.name)
+            put(U_EMAIL,        user.email.lowercase())
+            put(U_PASSWORD,     user.password)
+            put(U_ROLE,         user.role)
+            put(U_DISABLED,     0)
+            put(U_AVATAR_COLOR, user.avatarColor)
         }
         return writableDatabase.insert(T_USERS, null, cv)
     }
@@ -205,18 +219,22 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(
         return writableDatabase.update(T_USERS, cv, "$COL_ID=?", arrayOf(userId.toString()))
     }
 
-    fun updateUserProfile(userId: Long, name: String): Int {
-        val cv = ContentValues().apply { put(U_NAME, name) }
+    fun updateUserProfile(userId: Long, name: String, avatarColor: String): Int {
+        val cv = ContentValues().apply {
+            put(U_NAME,         name)
+            put(U_AVATAR_COLOR, avatarColor)
+        }
         return writableDatabase.update(T_USERS, cv, "$COL_ID=?", arrayOf(userId.toString()))
     }
 
     private fun cursorToUser(c: Cursor) = User(
-        id       = c.getLong(c.getColumnIndexOrThrow(COL_ID)),
-        name     = c.getString(c.getColumnIndexOrThrow(U_NAME)),
-        email    = c.getString(c.getColumnIndexOrThrow(U_EMAIL)),
-        password = c.getString(c.getColumnIndexOrThrow(U_PASSWORD)),
-        role     = c.getString(c.getColumnIndexOrThrow(U_ROLE)),
-        disabled = c.getInt(c.getColumnIndexOrThrow(U_DISABLED)) == 1
+        id          = c.getLong(c.getColumnIndexOrThrow(COL_ID)),
+        name        = c.getString(c.getColumnIndexOrThrow(U_NAME)),
+        email       = c.getString(c.getColumnIndexOrThrow(U_EMAIL)),
+        password    = c.getString(c.getColumnIndexOrThrow(U_PASSWORD)),
+        role        = c.getString(c.getColumnIndexOrThrow(U_ROLE)),
+        disabled    = c.getInt(c.getColumnIndexOrThrow(U_DISABLED)) == 1,
+        avatarColor = c.getString(c.getColumnIndexOrThrow(U_AVATAR_COLOR)) ?: "#F97316"
     )
 
     // ─── LISTINGS ─────────────────────────────────────────────────────────────

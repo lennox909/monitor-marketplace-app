@@ -19,7 +19,7 @@ class CartActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_cart)
 
-        db = DatabaseHelper(this)
+        db = DatabaseHelper.getInstance(this)
 
         val rvCart      = findViewById<RecyclerView>(R.id.rvCart)
         val tvSubtotal  = findViewById<TextView>(R.id.tvSubtotal)
