@@ -38,7 +38,6 @@ class ProfileActivity : AppCompatActivity() {
                 tvProfileName.text  = user?.name  ?: "N/A"
                 tvProfileEmail.text = user?.email ?: "N/A"
                 tvProfileRole.text  = Session.role
-
                 val color    = user?.avatarColor ?: "#F97316"
                 val initials = getInitials(user?.name ?: "U")
                 ivAvatar.setImageBitmap(createAvatarBitmap(initials, color))
@@ -65,6 +64,8 @@ class ProfileActivity : AppCompatActivity() {
             val i = Intent(this, MainActivity::class.java)
             i.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
             startActivity(i)
+            @Suppress("DEPRECATION")
+            overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
             finish()
         }
 
@@ -80,7 +81,7 @@ class ProfileActivity : AppCompatActivity() {
             finish()
         }
 
-        // Bottom nav — profile is selected
+        // Bottom nav
         bottomNav.selectedItemId = R.id.nav_profile
         bottomNav.setOnItemSelectedListener { item ->
             when (item.itemId) {
@@ -88,11 +89,15 @@ class ProfileActivity : AppCompatActivity() {
                     val i = Intent(this, MainActivity::class.java)
                     i.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
                     startActivity(i)
+                    @Suppress("DEPRECATION")
+                    overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
                     finish()
                     true
                 }
                 R.id.nav_cart -> {
                     startActivity(Intent(this, CartActivity::class.java))
+                    @Suppress("DEPRECATION")
+                    overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
                     finish()
                     true
                 }

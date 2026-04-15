@@ -31,7 +31,6 @@ class CartActivity : AppCompatActivity() {
 
         rvCart.layoutManager = LinearLayoutManager(this)
 
-        // Setup adapter with callbacks
         adapter = CartAdapter(
             items = mutableListOf(),
             onQtyChanged = { row, newQty ->
@@ -61,12 +60,16 @@ class CartActivity : AppCompatActivity() {
                     val i = Intent(this, MainActivity::class.java)
                     i.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
                     startActivity(i)
+                    @Suppress("DEPRECATION")
+                    overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
                     finish()
                     true
                 }
                 R.id.nav_cart -> true
                 R.id.nav_profile -> {
                     startActivity(Intent(this, ProfileActivity::class.java))
+                    @Suppress("DEPRECATION")
+                    overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
                     finish()
                     true
                 }

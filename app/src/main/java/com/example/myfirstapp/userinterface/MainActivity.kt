@@ -46,7 +46,6 @@ class MainActivity : AppCompatActivity() {
         val buyerControls = findViewById<LinearLayout>(R.id.buyerControls)
         val bottomNav     = findViewById<BottomNavigationView>(R.id.bottomNav)
 
-        // Recycler
         recycler.layoutManager = LinearLayoutManager(this)
         adapter = ListingAdapter(emptyList()) { listingId ->
             val i = Intent(this, ListingDetailActivity::class.java)
@@ -55,7 +54,6 @@ class MainActivity : AppCompatActivity() {
         }
         recycler.adapter = adapter
 
-        // Initial UI
         switchMode.isChecked = Session.isBuyMode
         updateModeUI(Session.isBuyMode, tvWelcome, tvModeLabel, btnAddListing, buyerControls, bottomNav)
 
@@ -66,16 +64,12 @@ class MainActivity : AppCompatActivity() {
         }
 
         etSearch.addTextChangedListener(object : TextWatcher {
-            override fun afterTextChanged(s: Editable?) {
-                applyFilters(s.toString(), tvEmpty, recycler)
-            }
+            override fun afterTextChanged(s: Editable?) { applyFilters(s.toString(), tvEmpty, recycler) }
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
         })
 
-        btnFilter.setOnClickListener {
-            showFilterDialog(tvEmpty, recycler)
-        }
+        btnFilter.setOnClickListener { showFilterDialog(tvEmpty, recycler) }
 
         btnAddListing.setOnClickListener {
             startActivity(Intent(this, AddEditListingActivity::class.java))
@@ -90,26 +84,27 @@ class MainActivity : AppCompatActivity() {
         }
 
         // Bottom nav
+        bottomNav.selectedItemId = R.id.nav_home
         bottomNav.setOnItemSelectedListener { item ->
             when (item.itemId) {
-                R.id.nav_home -> {
-                    // Already on home
-                    true
-                }
+                R.id.nav_home -> true
                 R.id.nav_cart -> {
                     startActivity(Intent(this, CartActivity::class.java))
+                    @Suppress("DEPRECATION")
+                    overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
+                    finish()
                     true
                 }
                 R.id.nav_profile -> {
                     startActivity(Intent(this, ProfileActivity::class.java))
+                    @Suppress("DEPRECATION")
+                    overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
+                    finish()
                     true
                 }
                 else -> false
             }
         }
-
-        // Set home as selected
-        bottomNav.selectedItemId = R.id.nav_home
     }
 
     override fun onResume() {
@@ -150,7 +145,6 @@ class MainActivity : AppCompatActivity() {
                 filterCondition = spCondition.selectedItem.toString()
                 filterMinPrice  = etMinPrice.text.toString().toDoubleOrNull()
                 filterMaxPrice  = etMaxPrice.text.toString().toDoubleOrNull()
-
                 val hasFilter = filterCategory != "All Categories" ||
                         filterCondition != "All Conditions" ||
                         filterMinPrice != null || filterMaxPrice != null
@@ -182,14 +176,12 @@ class MainActivity : AppCompatActivity() {
             tvModeLabel.text         = "Buy Mode"
             btnAdd.visibility        = View.GONE
             buyerControls.visibility = View.VISIBLE
-            // Show cart in bottom nav
             bottomNav.menu.findItem(R.id.nav_cart).isVisible = true
         } else {
             tvWelcome.text           = "My Listings"
             tvModeLabel.text         = "Sell Mode"
             btnAdd.visibility        = View.VISIBLE
             buyerControls.visibility = View.GONE
-            // Hide cart in sell mode
             bottomNav.menu.findItem(R.id.nav_cart).isVisible = false
         }
     }
