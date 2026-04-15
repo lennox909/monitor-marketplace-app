@@ -17,47 +17,50 @@ class ProfileActivity : AppCompatActivity() {
         setContentView(R.layout.activity_profile)
 
         val ivAvatar       = findViewById<ImageView>(R.id.ivAvatar)
-        val tvProfileName  = findViewById<TextView>(R.id.tvProfileName)
+        val tvGreeting     = findViewById<TextView>(R.id.tvGreeting)
         val tvProfileEmail = findViewById<TextView>(R.id.tvProfileEmail)
-        val tvProfileRole  = findViewById<TextView>(R.id.tvProfileRole)
-        val btnEditProfile = findViewById<Button>(R.id.btnEditProfile)
-        val btnMyOrders    = findViewById<Button>(R.id.btnMyOrders)
-        val btnMyListings  = findViewById<Button>(R.id.btnMyListings)
-        val btnSettings    = findViewById<Button>(R.id.btnSettings)
-        val btnLogout      = findViewById<Button>(R.id.btnLogout)
-        val progressBar    = findViewById<ProgressBar>(R.id.progressProfile)
+        val btnEditProfile = findViewById<LinearLayout>(R.id.btnEditProfile)
+        val btnMyOrders    = findViewById<LinearLayout>(R.id.btnMyOrders)
+        val btnMyListings  = findViewById<LinearLayout>(R.id.btnMyListings)
+        val dividerOrders  = findViewById<View>(R.id.dividerOrders)
+        val btnSettings    = findViewById<LinearLayout>(R.id.btnSettings)
+        val btnLogout      = findViewById<LinearLayout>(R.id.btnLogout)
         val bottomNav      = findViewById<BottomNavigationView>(R.id.bottomNav)
 
-        progressBar.visibility = View.VISIBLE
-
+        // Load user info
         Thread {
             val db   = DatabaseHelper.getInstance(this)
             val user = db.getUserById(Session.userId)
             runOnUiThread {
-                progressBar.visibility = View.GONE
-                tvProfileName.text  = user?.name  ?: "N/A"
-                tvProfileEmail.text = user?.email ?: "N/A"
-                tvProfileRole.text  = Session.role
+                tvGreeting.text     = "Hi, ${user?.name?.split(" ")?.firstOrNull() ?: "there"}"
+                tvProfileEmail.text = user?.email ?: ""
                 val color    = user?.avatarColor ?: "#F97316"
                 val initials = getInitials(user?.name ?: "U")
                 ivAvatar.setImageBitmap(createAvatarBitmap(initials, color))
             }
         }.start()
 
+        // Show My Orders for buy mode, My Listings for sell mode
         if (Session.isBuyMode) {
-            btnMyOrders.visibility   = View.VISIBLE
+            btnMyOrders.visibility  = View.VISIBLE
+            dividerOrders.visibility = View.VISIBLE
             btnMyListings.visibility = View.GONE
         } else {
             btnMyOrders.visibility   = View.GONE
+            dividerOrders.visibility = View.GONE
             btnMyListings.visibility = View.VISIBLE
         }
 
         btnEditProfile.setOnClickListener {
             startActivity(Intent(this, EditProfileActivity::class.java))
+            @Suppress("DEPRECATION")
+            overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
         }
 
         btnMyOrders.setOnClickListener {
             startActivity(Intent(this, MyOrdersActivity::class.java))
+            @Suppress("DEPRECATION")
+            overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
         }
 
         btnMyListings.setOnClickListener {
@@ -71,6 +74,8 @@ class ProfileActivity : AppCompatActivity() {
 
         btnSettings.setOnClickListener {
             startActivity(Intent(this, SettingsActivity::class.java))
+            @Suppress("DEPRECATION")
+            overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
         }
 
         btnLogout.setOnClickListener {
@@ -109,13 +114,13 @@ class ProfileActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        val ivAvatar      = findViewById<ImageView>(R.id.ivAvatar)
-        val tvProfileName = findViewById<TextView>(R.id.tvProfileName)
+        val ivAvatar   = findViewById<ImageView>(R.id.ivAvatar)
+        val tvGreeting = findViewById<TextView>(R.id.tvGreeting)
         Thread {
             val db   = DatabaseHelper.getInstance(this)
             val user = db.getUserById(Session.userId)
             runOnUiThread {
-                tvProfileName.text = user?.name ?: "N/A"
+                tvGreeting.text = "Hi, ${user?.name?.split(" ")?.firstOrNull() ?: "there"}"
                 val color    = user?.avatarColor ?: "#F97316"
                 val initials = getInitials(user?.name ?: "U")
                 ivAvatar.setImageBitmap(createAvatarBitmap(initials, color))

@@ -1,11 +1,13 @@
 package com.example.myfirstapp.userinterface
 
+import android.content.Intent
 import android.os.Bundle
-import android.widget.Switch
-import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
+import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.google.android.material.switchmaterial.SwitchMaterial
 import com.example.myfirstapp.R
+
 
 class SettingsActivity : AppCompatActivity() {
 
@@ -13,22 +15,48 @@ class SettingsActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_settings)
 
-        val switchDarkMode = findViewById<Switch>(R.id.switchDarkMode)
-        val prefs = getSharedPreferences("app_settings", MODE_PRIVATE)
+        val switchDarkMode = findViewById<SwitchMaterial>(R.id.switchDarkMode)
+        val bottomNav      = findViewById<BottomNavigationView>(R.id.bottomNav)
+        val prefs          = getSharedPreferences("app_settings", MODE_PRIVATE)
 
-        // Reflect current state
-        val isDark = prefs.getBoolean("dark_mode", false)
-        switchDarkMode.isChecked = isDark
+        switchDarkMode.isChecked = prefs.getBoolean("dark_mode", false)
 
         switchDarkMode.setOnCheckedChangeListener { _, isChecked ->
-            // Save preference
             prefs.edit().putBoolean("dark_mode", isChecked).apply()
+            AppCompatDelegate.setDefaultNightMode(
+                if (isChecked) AppCompatDelegate.MODE_NIGHT_YES
+                else AppCompatDelegate.MODE_NIGHT_NO
+            )
+        }
 
-            // Apply immediately
-            if (isChecked) {
-                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
-            } else {
-                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
+        // Bottom nav - profile selected
+        bottomNav.selectedItemId = R.id.nav_profile
+        bottomNav.setOnItemSelectedListener { item ->
+            when (item.itemId) {
+                R.id.nav_home -> {
+                    val i = Intent(this, MainActivity::class.java)
+                    i.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
+                    startActivity(i)
+                    @Suppress("DEPRECATION")
+                    overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
+                    finish()
+                    true
+                }
+                R.id.nav_cart -> {
+                    startActivity(Intent(this, CartActivity::class.java))
+                    @Suppress("DEPRECATION")
+                    overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
+                    finish()
+                    true
+                }
+                R.id.nav_profile -> {
+                    startActivity(Intent(this, ProfileActivity::class.java))
+                    @Suppress("DEPRECATION")
+                    overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
+                    finish()
+                    true
+                }
+                else -> false
             }
         }
     }

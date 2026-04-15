@@ -48,14 +48,21 @@
             android:windowSoftInputMode="adjustResize" />
 
         <activity android:name=".userinterface.OrderConfirmationActivity" />
-        <activity android:name=".userinterface.MyOrdersActivity" />
+
+        <activity
+            android:name=".userinterface.MyOrdersActivity"
+            android:parentActivityName=".userinterface.ProfileActivity" />
+
         <activity android:name=".userinterface.ProfileActivity" />
 
         <activity
             android:name=".userinterface.EditProfileActivity"
+            android:parentActivityName=".userinterface.ProfileActivity"
             android:windowSoftInputMode="adjustResize" />
 
-        <activity android:name=".userinterface.SettingsActivity" />
+        <activity
+            android:name=".userinterface.SettingsActivity"
+            android:parentActivityName=".userinterface.ProfileActivity" />
 
     </application>
 </manifest>

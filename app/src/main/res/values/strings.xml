@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">Monitor Exchange Marketplace</string>
+    <string name="settings">Settings</string>
+    <string name="dark_mode">Dark Mode</string>
 </resources>
