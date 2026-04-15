@@ -2,7 +2,7 @@
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#F5F7FB"
+    android:background="@color/bg_primary"
     android:padding="24dp">
 
     <LinearLayout
@@ -16,7 +16,7 @@
             android:text="Edit Profile"
             android:textSize="26sp"
             android:textStyle="bold"
-            android:textColor="#1F2A44"
+            android:textColor="@color/text_primary"
             android:layout_marginBottom="24dp" />
 
         <!-- Avatar preview -->
@@ -34,25 +34,32 @@
             android:text="Choose Avatar Color"
             android:textSize="14sp"
             android:textStyle="bold"
-            android:textColor="#374151"
+            android:textColor="@color/text_primary"
             android:layout_marginBottom="8dp" />
 
-        <!-- Color grid -->
-        <LinearLayout
-            android:id="@+id/colorGrid"
+        <!-- Color row -->
+        <HorizontalScrollView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:layout_marginBottom="24dp" />
+            android:layout_marginBottom="24dp">
 
-        <!-- Name field -->
+            <LinearLayout
+                android:id="@+id/colorGrid"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:padding="4dp" />
+
+        </HorizontalScrollView>
+
+        <!-- Name -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Full Name"
             android:textSize="14sp"
             android:textStyle="bold"
-            android:textColor="#374151"
+            android:textColor="@color/text_primary"
             android:layout_marginBottom="6dp" />
 
         <EditText
@@ -61,6 +68,60 @@
             android:layout_height="wrap_content"
             android:hint="Enter your name"
             android:inputType="textPersonName"
+            android:layout_marginBottom="16dp" />
+
+        <!-- Email -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="UTA Email"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:textColor="@color/text_primary"
+            android:layout_marginBottom="6dp" />
+
+        <EditText
+            android:id="@+id/etEditEmail"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="example@mavs.uta.edu"
+            android:inputType="textEmailAddress"
+            android:layout_marginBottom="16dp" />
+
+        <!-- New Password -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="New Password (leave blank to keep current)"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:textColor="@color/text_primary"
+            android:layout_marginBottom="6dp" />
+
+        <EditText
+            android:id="@+id/etEditPassword"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Enter new password"
+            android:inputType="textPassword"
+            android:layout_marginBottom="16dp" />
+
+        <!-- Confirm Password -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Confirm New Password"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:textColor="@color/text_primary"
+            android:layout_marginBottom="6dp" />
+
+        <EditText
+            android:id="@+id/etEditConfirmPassword"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Re-enter new password"
+            android:inputType="textPassword"
             android:layout_marginBottom="24dp" />
 
         <Button

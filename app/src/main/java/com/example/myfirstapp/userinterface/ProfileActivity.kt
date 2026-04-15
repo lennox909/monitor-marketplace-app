@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.view.View
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
+import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.example.myfirstapp.R
 import com.example.myfirstapp.data.DatabaseHelper
 
@@ -25,22 +26,21 @@ class ProfileActivity : AppCompatActivity() {
         val btnSettings    = findViewById<Button>(R.id.btnSettings)
         val btnLogout      = findViewById<Button>(R.id.btnLogout)
         val progressBar    = findViewById<ProgressBar>(R.id.progressProfile)
+        val bottomNav      = findViewById<BottomNavigationView>(R.id.bottomNav)
 
         progressBar.visibility = View.VISIBLE
 
         Thread {
             val db   = DatabaseHelper.getInstance(this)
             val user = db.getUserById(Session.userId)
-
             runOnUiThread {
                 progressBar.visibility = View.GONE
                 tvProfileName.text  = user?.name  ?: "N/A"
                 tvProfileEmail.text = user?.email ?: "N/A"
                 tvProfileRole.text  = Session.role
 
-                // Draw avatar
-                val color       = user?.avatarColor ?: "#F97316"
-                val initials    = getInitials(user?.name ?: "U")
+                val color    = user?.avatarColor ?: "#F97316"
+                val initials = getInitials(user?.name ?: "U")
                 ivAvatar.setImageBitmap(createAvatarBitmap(initials, color))
             }
         }.start()
@@ -61,7 +61,12 @@ class ProfileActivity : AppCompatActivity() {
             startActivity(Intent(this, MyOrdersActivity::class.java))
         }
 
-        btnMyListings.setOnClickListener { finish() }
+        btnMyListings.setOnClickListener {
+            val i = Intent(this, MainActivity::class.java)
+            i.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
+            startActivity(i)
+            finish()
+        }
 
         btnSettings.setOnClickListener {
             startActivity(Intent(this, SettingsActivity::class.java))
@@ -73,6 +78,27 @@ class ProfileActivity : AppCompatActivity() {
             Session.isBuyMode = true
             startActivity(Intent(this, LoginActivity::class.java))
             finish()
+        }
+
+        // Bottom nav — profile is selected
+        bottomNav.selectedItemId = R.id.nav_profile
+        bottomNav.setOnItemSelectedListener { item ->
+            when (item.itemId) {
+                R.id.nav_home -> {
+                    val i = Intent(this, MainActivity::class.java)
+                    i.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
+                    startActivity(i)
+                    finish()
+                    true
+                }
+                R.id.nav_cart -> {
+                    startActivity(Intent(this, CartActivity::class.java))
+                    finish()
+                    true
+                }
+                R.id.nav_profile -> true
+                else -> false
+            }
         }
     }
 

@@ -3,7 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fillViewport="true"
-    android:background="#F5F7FB">
+    android:background="@color/bg_primary">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -12,28 +12,30 @@
         android:gravity="center_horizontal"
         android:padding="24dp">
 
+        <ImageView
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:src="@mipmap/ic_launcher"
+            android:layout_gravity="center"
+            android:layout_marginTop="36dp"
+            android:layout_marginBottom="2dp" />
+
+
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Monitor Exchange"
             android:textSize="30sp"
             android:textStyle="bold"
-            android:textColor="#1F2A44"
-            android:layout_marginTop="36dp" />
+            android:textColor="@color/text_primary"
+            android:layout_marginTop="24dp" />
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Buy and sell monitors at UTA"
-            android:textSize="14sp"
-            android:textColor="#6B7280"
-            android:layout_marginTop="8dp"
-            android:layout_marginBottom="28dp" />
 
         <androidx.cardview.widget.CardView
             xmlns:app="http://schemas.android.com/apk/res-auto"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginTop="36dp"
             app:cardCornerRadius="18dp"
             app:cardElevation="6dp">
 
@@ -92,20 +94,13 @@
                     android:text="Create Account"
                     android:textAllCaps="false"
                     android:textStyle="bold"
-                    android:textColor="#1F2A44"
+                    android:textColor="@color/text_primary"
                     android:backgroundTint="#E5E7EB"
                     android:layout_marginTop="12dp" />
 
             </LinearLayout>
         </androidx.cardview.widget.CardView>
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Admin: admin@mavs.uta.edu / admin123"
-            android:textSize="12sp"
-            android:textColor="#6B7280"
-            android:layout_marginTop="16dp" />
 
     </LinearLayout>
 </ScrollView>

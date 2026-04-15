@@ -3,7 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:padding="24dp"
-    android:background="#F5F7FB">
+    android:background="@color/bg_primary">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -16,7 +16,7 @@
             android:text="Monitor Listing"
             android:textStyle="bold"
             android:textSize="22sp"
-            android:textColor="#1F2A44"
+            android:textColor="@color/text_primary"
             android:layout_marginBottom="20dp" />
 
         <EditText
@@ -118,8 +118,7 @@
             android:layout_height="wrap_content"
             android:text="No image selected"
             android:textSize="12sp"
-            android:textColor="#6B7280"
-            android:layout_marginBottom="8dp" />
+            android:textColor="@color/text_secondary"            android:layout_marginBottom="8dp" />
 
         <Button
             android:id="@+id/btnPickImage"
@@ -127,7 +126,7 @@
             android:layout_height="wrap_content"
             android:text="Choose Photo from Gallery"
             android:textAllCaps="false"
-            android:textColor="#1F2A44"
+            android:textColor="@color/text_primary"
             android:backgroundTint="#E5E7EB"
             android:layout_marginBottom="20dp" />
 

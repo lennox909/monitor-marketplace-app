@@ -4,7 +4,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:padding="16dp"
-    android:background="#F5F7FB">
+    android:background="@color/bg_primary">
 
     <!-- Title -->
     <TextView
@@ -13,7 +13,7 @@
         android:text="Admin Dashboard"
         android:textSize="22sp"
         android:textStyle="bold"
-        android:textColor="#1F2A44"
+        android:textColor="@color/text_primary"
         android:layout_marginBottom="12dp" />
 
     <!-- Stats card -->
@@ -37,8 +37,7 @@
                 android:text="Overview"
                 android:textSize="13sp"
                 android:textStyle="bold"
-                android:textColor="#6B7280"
-                android:layout_marginBottom="6dp" />
+                android:textColor="@color/text_secondary"                android:layout_marginBottom="6dp" />
 
             <TextView
                 android:id="@+id/tvStats"
@@ -46,7 +45,7 @@
                 android:layout_height="wrap_content"
                 android:text="Loading..."
                 android:textSize="15sp"
-                android:textColor="#1F2A44" />
+                android:textColor="@color/text_primary" />
 
         </LinearLayout>
     </androidx.cardview.widget.CardView>
@@ -78,7 +77,7 @@
             android:text="Listings"
             android:textAllCaps="false"
             android:textStyle="bold"
-            android:textColor="#1F2A44"
+            android:textColor="@color/text_primary"
             android:backgroundTint="#E5E7EB" />
 
     </LinearLayout>
@@ -90,8 +89,7 @@
         android:layout_height="wrap_content"
         android:text="Users — tap to enable / disable"
         android:textSize="12sp"
-        android:textColor="#6B7280"
-        android:layout_marginBottom="6dp" />
+        android:textColor="@color/text_secondary"        android:layout_marginBottom="6dp" />
 
     <!-- Loading -->
     <ProgressBar
@@ -108,8 +106,7 @@
         android:layout_height="wrap_content"
         android:text="Nothing here."
         android:gravity="center"
-        android:textColor="#6B7280"
-        android:textSize="14sp"
+        android:textColor="@color/text_secondary"        android:textSize="14sp"
         android:visibility="gone"
         android:layout_marginTop="40dp" />
 

@@ -11,6 +11,7 @@ import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.example.myfirstapp.R
 import com.example.myfirstapp.data.DatabaseHelper
 import com.example.myfirstapp.model.Listing
@@ -36,15 +37,14 @@ class MainActivity : AppCompatActivity() {
         val tvModeLabel   = findViewById<TextView>(R.id.tvModeLabel)
         val switchMode    = findViewById<Switch>(R.id.switchMode)
         val btnAddListing = findViewById<Button>(R.id.btnAddListing)
-        val btnCart       = findViewById<Button>(R.id.btnCart)
         val btnLogout     = findViewById<Button>(R.id.btnLogout)
-        val btnProfile    = findViewById<Button>(R.id.btnProfile)
         val recycler      = findViewById<RecyclerView>(R.id.recyclerView)
         val tvEmpty       = findViewById<TextView>(R.id.tvEmpty)
         val progressBar   = findViewById<ProgressBar>(R.id.progressBar)
         val etSearch      = findViewById<EditText>(R.id.etSearch)
         val btnFilter     = findViewById<Button>(R.id.btnFilter)
         val buyerControls = findViewById<LinearLayout>(R.id.buyerControls)
+        val bottomNav     = findViewById<BottomNavigationView>(R.id.bottomNav)
 
         // Recycler
         recycler.layoutManager = LinearLayoutManager(this)
@@ -57,11 +57,11 @@ class MainActivity : AppCompatActivity() {
 
         // Initial UI
         switchMode.isChecked = Session.isBuyMode
-        updateModeUI(Session.isBuyMode, tvWelcome, tvModeLabel, btnAddListing, btnCart, buyerControls)
+        updateModeUI(Session.isBuyMode, tvWelcome, tvModeLabel, btnAddListing, buyerControls, bottomNav)
 
         switchMode.setOnCheckedChangeListener { _, isChecked ->
             Session.isBuyMode = isChecked
-            updateModeUI(isChecked, tvWelcome, tvModeLabel, btnAddListing, btnCart, buyerControls)
+            updateModeUI(isChecked, tvWelcome, tvModeLabel, btnAddListing, buyerControls, bottomNav)
             loadListings(progressBar, tvEmpty, recycler, etSearch)
         }
 
@@ -81,21 +81,35 @@ class MainActivity : AppCompatActivity() {
             startActivity(Intent(this, AddEditListingActivity::class.java))
         }
 
-        btnCart.setOnClickListener {
-            startActivity(Intent(this, CartActivity::class.java))
-        }
-
-        btnProfile.setOnClickListener {
-            startActivity(Intent(this, ProfileActivity::class.java))
-        }
-
         btnLogout.setOnClickListener {
             Session.userId    = -1L
-            Session.role      = "BUYER"
+            Session.role      = "USER"
             Session.isBuyMode = true
             startActivity(Intent(this, LoginActivity::class.java))
             finish()
         }
+
+        // Bottom nav
+        bottomNav.setOnItemSelectedListener { item ->
+            when (item.itemId) {
+                R.id.nav_home -> {
+                    // Already on home
+                    true
+                }
+                R.id.nav_cart -> {
+                    startActivity(Intent(this, CartActivity::class.java))
+                    true
+                }
+                R.id.nav_profile -> {
+                    startActivity(Intent(this, ProfileActivity::class.java))
+                    true
+                }
+                else -> false
+            }
+        }
+
+        // Set home as selected
+        bottomNav.selectedItemId = R.id.nav_home
     }
 
     override fun onResume() {
@@ -104,6 +118,8 @@ class MainActivity : AppCompatActivity() {
         val tvEmpty     = findViewById<TextView>(R.id.tvEmpty)
         val recycler    = findViewById<RecyclerView>(R.id.recyclerView)
         val etSearch    = findViewById<EditText>(R.id.etSearch)
+        val bottomNav   = findViewById<BottomNavigationView>(R.id.bottomNav)
+        bottomNav.selectedItemId = R.id.nav_home
         loadListings(progressBar, tvEmpty, recycler, etSearch)
     }
 
@@ -118,7 +134,7 @@ class MainActivity : AppCompatActivity() {
         val categories = listOf("All Categories", "Gaming", "Office", "4K", "Ultrawide", "General")
         val conditions = listOf("All Conditions", "New", "Like New", "Used")
 
-        spCategory.adapter = ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item, categories)
+        spCategory.adapter  = ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item, categories)
         spCondition.adapter = ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item, conditions)
 
         spCategory.setSelection(categories.indexOf(filterCategory).coerceAtLeast(0))
@@ -158,21 +174,23 @@ class MainActivity : AppCompatActivity() {
         tvWelcome: TextView,
         tvModeLabel: TextView,
         btnAdd: Button,
-        btnCart: Button,
-        buyerControls: LinearLayout
+        buyerControls: LinearLayout,
+        bottomNav: BottomNavigationView
     ) {
         if (isBuyMode) {
             tvWelcome.text           = "Monitor Marketplace"
             tvModeLabel.text         = "Buy Mode"
             btnAdd.visibility        = View.GONE
-            btnCart.visibility       = View.VISIBLE
             buyerControls.visibility = View.VISIBLE
+            // Show cart in bottom nav
+            bottomNav.menu.findItem(R.id.nav_cart).isVisible = true
         } else {
             tvWelcome.text           = "My Listings"
             tvModeLabel.text         = "Sell Mode"
             btnAdd.visibility        = View.VISIBLE
-            btnCart.visibility       = View.GONE
             buyerControls.visibility = View.GONE
+            // Hide cart in sell mode
+            bottomNav.menu.findItem(R.id.nav_cart).isVisible = false
         }
     }
 
@@ -188,7 +206,7 @@ class MainActivity : AppCompatActivity() {
 
         Thread {
             val listings = if (Session.isBuyMode)
-                db.getAllListingsGlobal()
+                db.getAllListingsGlobal(Session.userId)
             else
                 db.getListingsBySeller(Session.userId)
 

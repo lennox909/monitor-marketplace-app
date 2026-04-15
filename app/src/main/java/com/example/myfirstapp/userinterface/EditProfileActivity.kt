@@ -26,10 +26,13 @@ class EditProfileActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_edit_profile)
 
-        val etName    = findViewById<EditText>(R.id.etEditName)
-        val ivPreview = findViewById<ImageView>(R.id.ivAvatarPreview)
-        val colorRow  = findViewById<LinearLayout>(R.id.colorGrid)
-        val btnSave   = findViewById<Button>(R.id.btnSaveProfile)
+        val etName        = findViewById<EditText>(R.id.etEditName)
+        val etEmail       = findViewById<EditText>(R.id.etEditEmail)
+        val etPassword    = findViewById<EditText>(R.id.etEditPassword)
+        val etConfirmPass = findViewById<EditText>(R.id.etEditConfirmPassword)
+        val ivPreview     = findViewById<ImageView>(R.id.ivAvatarPreview)
+        val colorRow      = findViewById<LinearLayout>(R.id.colorGrid)
+        val btnSave       = findViewById<Button>(R.id.btnSaveProfile)
 
         // Load current user
         Thread {
@@ -37,12 +40,13 @@ class EditProfileActivity : AppCompatActivity() {
             val user = db.getUserById(Session.userId)
             runOnUiThread {
                 etName.setText(user?.name ?: "")
+                etEmail.setText(user?.email ?: "")
                 selectedColor = user?.avatarColor ?: "#F97316"
                 updatePreview(ivPreview, etName.text.toString(), selectedColor)
             }
         }.start()
 
-        // Build color circles in a single horizontal row
+        // Build color circles
         colorRow.removeAllViews()
         avatarColors.forEach { color ->
             val size = 80
@@ -60,18 +64,45 @@ class EditProfileActivity : AppCompatActivity() {
         }
 
         btnSave.setOnClickListener {
-            val newName = etName.text.toString().trim()
-            if (newName.isEmpty()) {
-                Toast.makeText(this, "Name cannot be empty", Toast.LENGTH_SHORT).show()
+            val newName     = etName.text.toString().trim()
+            val newEmail    = etEmail.text.toString().trim().lowercase()
+            val newPassword = etPassword.text.toString()
+            val confirmPass = etConfirmPass.text.toString()
+
+            if (newName.isEmpty() || newEmail.isEmpty()) {
+                Toast.makeText(this, "Name and email cannot be empty", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
+            }
+
+            if (!newEmail.endsWith("@mavs.uta.edu")) {
+                Toast.makeText(this, "Must use a @mavs.uta.edu email", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
+            // Only validate password if user typed something
+            if (newPassword.isNotEmpty()) {
+                if (newPassword.length < 6) {
+                    Toast.makeText(this, "Password must be at least 6 characters", Toast.LENGTH_SHORT).show()
+                    return@setOnClickListener
+                }
+                if (newPassword != confirmPass) {
+                    Toast.makeText(this, "Passwords do not match", Toast.LENGTH_SHORT).show()
+                    return@setOnClickListener
+                }
             }
 
             btnSave.isEnabled = false
             btnSave.text      = "Saving..."
 
             Thread {
-                val db = DatabaseHelper.getInstance(this)
-                db.updateUserProfile(Session.userId, newName, selectedColor)
+                val db   = DatabaseHelper.getInstance(this)
+                val user = db.getUserById(Session.userId)
+
+                // Use existing password if not changing
+                val passwordToSave = if (newPassword.isNotEmpty()) newPassword else user?.password ?: ""
+
+                db.updateUserFull(Session.userId, newName, newEmail, passwordToSave, selectedColor)
+
                 runOnUiThread {
                     Toast.makeText(this, "Profile updated", Toast.LENGTH_SHORT).show()
                     finish()

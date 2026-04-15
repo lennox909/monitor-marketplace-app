@@ -64,7 +64,6 @@ class DatabaseHelper private constructor(context: Context) : SQLiteOpenHelper(
         private const val OI_PRICE    = "price"
         private const val OI_QTY      = "quantity"
 
-        // Singleton instance
         @Volatile
         private var instance: DatabaseHelper? = null
 
@@ -227,6 +226,16 @@ class DatabaseHelper private constructor(context: Context) : SQLiteOpenHelper(
         return writableDatabase.update(T_USERS, cv, "$COL_ID=?", arrayOf(userId.toString()))
     }
 
+    fun updateUserFull(userId: Long, name: String, email: String, password: String, avatarColor: String): Int {
+        val cv = ContentValues().apply {
+            put(U_NAME,         name)
+            put(U_EMAIL,        email.lowercase())
+            put(U_PASSWORD,     password)
+            put(U_AVATAR_COLOR, avatarColor)
+        }
+        return writableDatabase.update(T_USERS, cv, "$COL_ID=?", arrayOf(userId.toString()))
+    }
+
     private fun cursorToUser(c: Cursor) = User(
         id          = c.getLong(c.getColumnIndexOrThrow(COL_ID)),
         name        = c.getString(c.getColumnIndexOrThrow(U_NAME)),
@@ -257,10 +266,11 @@ class DatabaseHelper private constructor(context: Context) : SQLiteOpenHelper(
         return writableDatabase.insert(T_LISTINGS, null, cv)
     }
 
-    fun getAllListingsGlobal(): List<Listing> {
+    fun getAllListingsGlobal(currentUserId: Long): List<Listing> {
         val cursor = readableDatabase.query(
             T_LISTINGS, null,
-            "$L_STATUS=?", arrayOf("ACTIVE"),
+            "$L_STATUS=? AND $L_SELLER_ID!=?",
+            arrayOf("ACTIVE", currentUserId.toString()),
             null, null, "$L_CREATED_AT DESC"
         )
         return cursor.use { toListings(it) }

@@ -1,8 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools">
+
     <style name="Theme.MyFirstApp" parent="Theme.MaterialComponents.DayNight.NoActionBar">
         <item name="android:windowAnimationStyle">@style/WindowAnimationStyle</item>
         <item name="android:statusBarColor">#FF6A00</item>
-        <item name="android:navigationBarColor">#FF6A00</item>
+        <item name="android:navigationBarColor">@color/bg_primary</item>
+        <item name="android:windowBackground">@color/bg_primary</item>
+        <item name="colorPrimary">#F97316</item>
+        <item name="colorPrimaryVariant">#EA6C00</item>
+        <item name="colorOnPrimary">#FFFFFF</item>
     </style>
 
     <style name="WindowAnimationStyle" parent="@android:style/Animation.Activity">
@@ -16,4 +22,5 @@
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
     </style>
+
 </resources>

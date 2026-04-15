@@ -1,170 +1,167 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:padding="16dp"
-    android:background="#F5F7FB">
+    android:background="@color/bg_primary">
 
-    <!-- Header -->
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center_vertical"
-        android:layout_marginBottom="10dp">
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:orientation="vertical"
+        android:padding="16dp">
 
-        <TextView
-            android:id="@+id/tvWelcome"
-            android:layout_width="0dp"
+        <!-- Header -->
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="Monitor Marketplace"
-            android:textSize="20sp"
-            android:textStyle="bold"
-            android:textColor="#1F2A44" />
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="10dp">
 
+            <TextView
+                android:id="@+id/tvWelcome"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Monitor Marketplace"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:textColor="@color/text_primary" />
+
+            <Button
+                android:id="@+id/btnLogout"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Logout"
+                android:textAllCaps="false"
+                android:textColor="@color/text_primary"
+                android:backgroundTint="@color/btn_gray" />
+
+        </LinearLayout>
+
+        <!-- Mode switch row -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="10dp">
+
+            <TextView
+                android:id="@+id/tvModeLabel"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Buy Mode"
+                android:textSize="13sp"
+                android:textColor="@color/text_secondary" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Sell"
+                android:textSize="13sp"
+                android:textColor="@color/text_secondary"
+                android:layout_marginEnd="4dp" />
+
+            <Switch
+                android:id="@+id/switchMode"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Buy"
+                android:textSize="13sp"
+                android:textColor="@color/text_secondary"
+                android:layout_marginStart="4dp" />
+
+        </LinearLayout>
+
+        <!-- Seller: Add Listing -->
         <Button
-            android:id="@+id/btnProfile"
-            android:layout_width="wrap_content"
+            android:id="@+id/btnAddListing"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Profile"
-            android:textAllCaps="false"
-            android:textColor="#1F2A44"
-            android:backgroundTint="#E5E7EB"
-            android:layout_marginEnd="6dp" />
-
-        <Button
-            android:id="@+id/btnLogout"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Logout"
-            android:textAllCaps="false"
-            android:textColor="#1F2A44"
-            android:backgroundTint="#E5E7EB" />
-
-    </LinearLayout>
-
-    <!-- Mode switch row -->
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center_vertical"
-        android:layout_marginBottom="10dp">
-
-        <TextView
-            android:id="@+id/tvModeLabel"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="Buy Mode"
-            android:textSize="13sp"
-            android:textColor="#6B7280" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Sell"
-            android:textSize="13sp"
-            android:textColor="#6B7280"
-            android:layout_marginEnd="4dp" />
-
-        <Switch
-            android:id="@+id/switchMode"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Buy"
-            android:textSize="13sp"
-            android:textColor="#6B7280"
-            android:layout_marginStart="4dp" />
-
-    </LinearLayout>
-
-    <!-- Seller: Add Listing -->
-    <Button
-        android:id="@+id/btnAddListing"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="+ Add New Listing"
-        android:textAllCaps="false"
-        android:textStyle="bold"
-        android:textColor="#FFFFFF"
-        android:backgroundTint="#F97316"
-        android:visibility="gone"
-        android:layout_marginBottom="10dp" />
-
-    <!-- Buyer: Cart -->
-    <Button
-        android:id="@+id/btnCart"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="View Cart"
-        android:textAllCaps="false"
-        android:textStyle="bold"
-        android:textColor="#FFFFFF"
-        android:backgroundTint="#F97316"
-        android:visibility="visible"
-        android:layout_marginBottom="10dp" />
-
-    <!-- Buyer controls -->
-    <LinearLayout
-        android:id="@+id/buyerControls"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:layout_marginBottom="8dp">
-
-        <EditText
-            android:id="@+id/etSearch"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:hint="Search by title or brand..."
-            android:inputType="text"
-            android:layout_marginEnd="8dp" />
-
-        <Button
-            android:id="@+id/btnFilter"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Filter"
+            android:text="+ Add New Listing"
             android:textAllCaps="false"
             android:textStyle="bold"
             android:textColor="#FFFFFF"
-            android:backgroundTint="#1F2A44" />
+            android:backgroundTint="#F97316"
+            android:visibility="gone"
+            android:layout_marginBottom="10dp" />
+
+        <!-- Buyer controls -->
+        <LinearLayout
+            android:id="@+id/buyerControls"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginBottom="8dp">
+
+            <EditText
+                android:id="@+id/etSearch"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:hint="Search by title or brand..."
+                android:inputType="text"
+                android:layout_marginEnd="8dp" />
+
+            <Button
+                android:id="@+id/btnFilter"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Filter"
+                android:textAllCaps="false"
+                android:textStyle="bold"
+                android:textColor="#FFFFFF"
+                android:backgroundTint="#1F2A44" />
+
+        </LinearLayout>
+
+        <!-- Loading -->
+        <ProgressBar
+            android:id="@+id/progressBar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:visibility="gone" />
+
+        <!-- Empty state -->
+        <TextView
+            android:id="@+id/tvEmpty"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="No listings found."
+            android:textColor="@color/text_secondary"
+            android:textSize="14sp"
+            android:gravity="center"
+            android:visibility="gone"
+            android:layout_marginTop="40dp" />
+
+        <!-- Listings -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recyclerView"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
 
     </LinearLayout>
 
-    <!-- Loading -->
-    <ProgressBar
-        android:id="@+id/progressBar"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:visibility="gone" />
-
-    <!-- Empty state -->
-    <TextView
-        android:id="@+id/tvEmpty"
+    <!-- Bottom Navigation -->
+    <com.google.android.material.bottomnavigation.BottomNavigationView
+        android:id="@+id/bottomNav"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="No listings found."
-        android:textColor="#6B7280"
-        android:textSize="14sp"
-        android:gravity="center"
-        android:visibility="gone"
-        android:layout_marginTop="40dp" />
-
-    <!-- Listings -->
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recyclerView"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1" />
+        android:background="#FFFFFF"
+        app:menu="@menu/bottom_nav_menu"
+        app:itemIconTint="#F97316"
+        app:itemTextColor="#F97316"
+        app:labelVisibilityMode="labeled" />
 
 </LinearLayout>

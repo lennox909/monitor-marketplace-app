@@ -1,5 +1,6 @@
 package com.example.myfirstapp.userinterface
 
+import android.graphics.Color
 import android.net.Uri
 import android.view.LayoutInflater
 import android.view.View
@@ -9,6 +10,7 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.myfirstapp.R
 import com.example.myfirstapp.model.Listing
+import java.io.File
 
 class ListingAdapter(
     private var items: List<Listing>,
@@ -21,6 +23,7 @@ class ListingAdapter(
         val tvPrice    : TextView  = itemView.findViewById(R.id.tvPrice)
         val tvBrand    : TextView  = itemView.findViewById(R.id.tvBrand)
         val tvCondition: TextView  = itemView.findViewById(R.id.tvCondition)
+        val tvStatus   : TextView  = itemView.findViewById(R.id.tvStatus)
     }
 
     fun updateData(newItems: List<Listing>) {
@@ -42,10 +45,40 @@ class ListingAdapter(
         holder.tvBrand.text     = "${listing.brand} • ${listing.screenSize}"
         holder.tvCondition.text = listing.condition
 
-        // Show thumbnail if photo exists
+        // Show status badge only in sell mode
+        if (!Session.isBuyMode) {
+            holder.tvStatus.visibility = View.VISIBLE
+            when (listing.status) {
+                "ACTIVE" -> {
+                    holder.tvStatus.text = "● In Stock"
+                    holder.tvStatus.setTextColor(Color.parseColor("#F97316"))
+                }
+                "REMOVED" -> {
+                    holder.tvStatus.text = "● Sold Out"
+                    holder.tvStatus.setTextColor(Color.parseColor("#6B7280"))
+                }
+                "SOLD" -> {
+                    holder.tvStatus.text = "● Out of Stock"
+                    holder.tvStatus.setTextColor(Color.parseColor("#6B7280"))
+                }
+                else -> {
+                    holder.tvStatus.text = listing.status
+                    holder.tvStatus.setTextColor(Color.parseColor("#6B7280"))
+                }
+            }
+        } else {
+            holder.tvStatus.visibility = View.GONE
+        }
+
+        // Load thumbnail
         if (!listing.photoUri.isNullOrEmpty()) {
             try {
-                holder.ivThumbnail.setImageURI(Uri.parse(listing.photoUri))
+                val file = File(listing.photoUri)
+                if (file.exists()) {
+                    holder.ivThumbnail.setImageURI(Uri.fromFile(file))
+                } else {
+                    holder.ivThumbnail.setImageResource(android.R.drawable.ic_menu_gallery)
+                }
             } catch (e: Exception) {
                 holder.ivThumbnail.setImageResource(android.R.drawable.ic_menu_gallery)
             }
@@ -53,7 +86,6 @@ class ListingAdapter(
             holder.ivThumbnail.setImageResource(android.R.drawable.ic_menu_gallery)
         }
 
-        // Click on the root CardView
         holder.itemView.setOnClickListener { onClick(listing.id) }
     }
 

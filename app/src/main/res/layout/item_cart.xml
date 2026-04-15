@@ -19,7 +19,7 @@
             android:layout_height="wrap_content"
             android:textStyle="bold"
             android:textSize="15sp"
-            android:textColor="#1F2A44" />
+            android:textColor="@color/text_primary" />
 
         <TextView
             android:id="@+id/tvItemPrice"
@@ -52,7 +52,7 @@
                 android:layout_height="wrap_content"
                 android:gravity="center"
                 android:textSize="15sp"
-                android:textColor="#1F2A44" />
+                android:textColor="@color/text_primary" />
 
             <Button
                 android:id="@+id/btnPlus"
