@@ -90,7 +90,7 @@ class MainActivity : AppCompatActivity() {
             finish()
         }
 
-        // Bottom nav - 4 tabs
+        // Bottom nav
         bottomNav.selectedItemId = R.id.nav_home
         bottomNav.setOnItemSelectedListener { item ->
             when (item.itemId) {
@@ -107,18 +107,20 @@ class MainActivity : AppCompatActivity() {
                 }
 
                 R.id.nav_cart -> {
-                    startActivity(Intent(this, CartActivity::class.java))
+                    val i = Intent(this, CartActivity::class.java)
+                    i.flags = Intent.FLAG_ACTIVITY_REORDER_TO_FRONT
+                    startActivity(i)
                     @Suppress("DEPRECATION")
                     overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
-                    finish()
                     true
                 }
 
                 R.id.nav_profile -> {
-                    startActivity(Intent(this, ProfileActivity::class.java))
+                    val i = Intent(this, ProfileActivity::class.java)
+                    i.flags = Intent.FLAG_ACTIVITY_REORDER_TO_FRONT
+                    startActivity(i)
                     @Suppress("DEPRECATION")
                     overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
-                    finish()
                     true
                 }
 

@@ -2,7 +2,7 @@ package com.example.myfirstapp.userinterface
 
 import android.content.Intent
 import android.os.Bundle
-import android.widget.Switch
+import com.google.android.material.switchmaterial.SwitchMaterial
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import com.google.android.material.bottomnavigation.BottomNavigationView
@@ -14,7 +14,7 @@ class SettingsActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_settings)
 
-        val switchDarkMode = findViewById<android.widget.Switch>(R.id.switchDarkMode)
+        val switchDarkMode = findViewById<SwitchMaterial>(R.id.switchDarkMode)
         val bottomNav      = findViewById<BottomNavigationView>(R.id.bottomNav)
         val prefs          = getSharedPreferences("app_settings", MODE_PRIVATE)
 

@@ -54,11 +54,10 @@ class CartActivity : AppCompatActivity() {
             when (item.itemId) {
                 R.id.nav_home -> {
                     val i = Intent(this, MainActivity::class.java)
-                    i.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
+                    i.flags = Intent.FLAG_ACTIVITY_REORDER_TO_FRONT
                     startActivity(i)
                     @Suppress("DEPRECATION")
                     overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
-                    finish()
                     true
                 }
                 R.id.nav_sell -> {
@@ -68,10 +67,11 @@ class CartActivity : AppCompatActivity() {
                 }
                 R.id.nav_cart -> true
                 R.id.nav_profile -> {
-                    startActivity(Intent(this, ProfileActivity::class.java))
+                    val i = Intent(this, ProfileActivity::class.java)
+                    i.flags = Intent.FLAG_ACTIVITY_REORDER_TO_FRONT
+                    startActivity(i)
                     @Suppress("DEPRECATION")
                     overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
-                    finish()
                     true
                 }
                 else -> false

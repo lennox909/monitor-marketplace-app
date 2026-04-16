@@ -3,7 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/bg_primary"
-    android:padding="20dp">
+    android:padding="16dp">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -14,10 +14,10 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Checkout"
-            android:textSize="26sp"
+            android:textSize="24sp"
             android:textStyle="bold"
             android:textColor="@color/text_primary"
-            android:layout_marginBottom="24dp" />
+            android:layout_marginBottom="20dp" />
 
         <!-- Shipping Section -->
         <TextView
@@ -26,10 +26,9 @@
             android:text="Shipping Information"
             android:textSize="16sp"
             android:textStyle="bold"
-            android:textColor="#374151"
-            android:layout_marginBottom="12dp" />
+            android:textColor="@color/text_primary"
+            android:layout_marginBottom="10dp" />
 
-        <!-- First + Last name row -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -76,15 +75,14 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="City"
-            android:inputType="textCapWords"
+            android:inputType="textPostalAddress"
             android:layout_marginBottom="10dp" />
 
-        <!-- State + ZIP row -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:layout_marginBottom="24dp">
+            android:layout_marginBottom="20dp">
 
             <EditText
                 android:id="@+id/etState"
@@ -92,7 +90,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:hint="State"
-                android:inputType="textCapWords"
+                android:inputType="text"
                 android:layout_marginEnd="8dp" />
 
             <EditText
@@ -109,11 +107,19 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Payment (Card)"
+            android:text="Payment Information"
             android:textSize="16sp"
             android:textStyle="bold"
-            android:textColor="#374151"
-            android:layout_marginBottom="12dp" />
+            android:textColor="@color/text_primary"
+            android:layout_marginBottom="4dp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Accepts: Visa · Mastercard · Amex · Discover"
+            android:textSize="12sp"
+            android:textColor="@color/text_secondary"
+            android:layout_marginBottom="10dp" />
 
         <EditText
             android:id="@+id/etCardName"
@@ -123,16 +129,36 @@
             android:inputType="textPersonName"
             android:layout_marginBottom="10dp" />
 
-        <EditText
-            android:id="@+id/etCardNumber"
+        <!-- Card number + card type -->
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Card Number (16 digits)"
-            android:inputType="number"
-            android:maxLength="16"
-            android:layout_marginBottom="10dp" />
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="10dp">
 
-        <!-- Expiry + CVV row -->
+            <EditText
+                android:id="@+id/etCardNumber"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:hint="Card Number"
+                android:inputType="number"
+                android:layout_marginEnd="8dp" />
+
+            <TextView
+                android:id="@+id/tvCardType"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text=""
+                android:textSize="13sp"
+                android:textStyle="bold"
+                android:textColor="#F97316"
+                android:minWidth="80dp"
+                android:gravity="center" />
+
+        </LinearLayout>
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -146,7 +172,6 @@
                 android:layout_weight="1"
                 android:hint="MM/YY"
                 android:inputType="number"
-                android:maxLength="5"
                 android:layout_marginEnd="8dp" />
 
             <EditText
@@ -155,8 +180,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:hint="CVV"
-                android:inputType="numberPassword"
-                android:maxLength="4" />
+                android:inputType="numberPassword" />
 
         </LinearLayout>
 
@@ -167,7 +191,6 @@
             android:text="Place Order"
             android:textAllCaps="false"
             android:textStyle="bold"
-            android:textSize="16sp"
             android:textColor="#FFFFFF"
             android:backgroundTint="#F97316" />
 
