@@ -15,6 +15,8 @@ class CartActivity : AppCompatActivity() {
 
     private lateinit var db: DatabaseHelper
     private lateinit var adapter: CartAdapter
+    private lateinit var tvSubtotal: TextView
+    private lateinit var btnCheckout: Button
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -22,33 +24,35 @@ class CartActivity : AppCompatActivity() {
 
         db = DatabaseHelper.getInstance(this)
 
-        val rvCart      = findViewById<RecyclerView>(R.id.rvCart)
-        val tvSubtotal  = findViewById<TextView>(R.id.tvSubtotal)
-        val btnCheckout = findViewById<Button>(R.id.btnCheckout)
-        val tvEmpty     = findViewById<TextView>(R.id.tvEmptyCart)
-        val progress    = findViewById<ProgressBar>(R.id.progressCart)
-        val bottomNav   = findViewById<BottomNavigationView>(R.id.bottomNav)
+        val rvCart    = findViewById<RecyclerView>(R.id.rvCart)
+        tvSubtotal    = findViewById(R.id.tvSubtotal)
+        btnCheckout   = findViewById(R.id.btnCheckout)
+        val tvEmpty   = findViewById<TextView>(R.id.tvEmptyCart)
+        val progress  = findViewById<ProgressBar>(R.id.progressCart)
+        val bottomNav = findViewById<BottomNavigationView>(R.id.bottomNav)
 
         rvCart.layoutManager = LinearLayoutManager(this)
 
         adapter = CartAdapter(
             items = mutableListOf(),
             onQtyChanged = { row, newQty ->
+                // Update subtotal immediately without reloading
+                updateSubtotal()
+                // Save to DB in background
                 Thread {
-                    if (newQty <= 0) db.removeCartItem(row.cartItemId)
-                    else db.updateCartItemQuantity(row.cartItemId, newQty)
-                    runOnUiThread { loadCart(rvCart, tvSubtotal, tvEmpty, progress) }
+                    db.updateCartItemQuantity(row.cartItemId, newQty)
                 }.start()
             },
             onRemove = { row ->
                 Thread {
                     db.removeCartItem(row.cartItemId)
-                    runOnUiThread { loadCart(rvCart, tvSubtotal, tvEmpty, progress) }
+                    runOnUiThread { loadCart(rvCart, tvEmpty, progress) }
                 }.start()
             }
         )
         rvCart.adapter = adapter
 
+        // Bottom nav
         bottomNav.selectedItemId = R.id.nav_cart
         bottomNav.setOnItemSelectedListener { item ->
             when (item.itemId) {
@@ -78,25 +82,28 @@ class CartActivity : AppCompatActivity() {
             }
         }
 
-        loadCart(rvCart, tvSubtotal, tvEmpty, progress)
-
+        // Checkout button — check cart is not empty first
         btnCheckout.setOnClickListener {
+            if (adapter.itemCount == 0) {
+                Toast.makeText(this, "Your cart is empty", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
             startActivity(Intent(this, CheckoutActivity::class.java))
         }
+
+        loadCart(rvCart, tvEmpty, progress)
     }
 
     override fun onResume() {
         super.onResume()
-        val rvCart     = findViewById<RecyclerView>(R.id.rvCart)
-        val tvSubtotal = findViewById<TextView>(R.id.tvSubtotal)
-        val tvEmpty    = findViewById<TextView>(R.id.tvEmptyCart)
-        val progress   = findViewById<ProgressBar>(R.id.progressCart)
-        loadCart(rvCart, tvSubtotal, tvEmpty, progress)
+        val rvCart  = findViewById<RecyclerView>(R.id.rvCart)
+        val tvEmpty = findViewById<TextView>(R.id.tvEmptyCart)
+        val progress = findViewById<ProgressBar>(R.id.progressCart)
+        loadCart(rvCart, tvEmpty, progress)
     }
 
     private fun loadCart(
         rvCart: RecyclerView,
-        tvSubtotal: TextView,
         tvEmpty: TextView,
         progress: ProgressBar
     ) {
@@ -105,7 +112,6 @@ class CartActivity : AppCompatActivity() {
         Thread {
             val cartItems = db.getCartItems(Session.userId)
             val rows      = mutableListOf<CartRow>()
-            var subtotal  = 0.0
 
             for (ci in cartItems) {
                 val listing = db.getListingById(ci.listingId) ?: continue
@@ -116,22 +122,30 @@ class CartActivity : AppCompatActivity() {
                     price      = listing.price,
                     qty        = ci.quantity
                 ))
-                subtotal += listing.price * ci.quantity
             }
 
             runOnUiThread {
                 progress.visibility = View.GONE
+
                 if (rows.isEmpty()) {
-                    tvEmpty.visibility = View.VISIBLE
-                    rvCart.visibility  = View.GONE
-                    tvSubtotal.text    = ""
+                    tvEmpty.visibility    = View.VISIBLE
+                    rvCart.visibility     = View.GONE
+                    tvSubtotal.text       = ""
+                    btnCheckout.isEnabled = false
+                    btnCheckout.alpha     = 0.5f
                 } else {
-                    tvEmpty.visibility = View.GONE
-                    rvCart.visibility  = View.VISIBLE
-                    tvSubtotal.text    = "Subtotal: $${String.format("%.2f", subtotal)}"
+                    tvEmpty.visibility    = View.GONE
+                    rvCart.visibility     = View.VISIBLE
+                    btnCheckout.isEnabled = true
+                    btnCheckout.alpha     = 1.0f
                     adapter.setData(rows)
+                    updateSubtotal()
                 }
             }
         }.start()
+    }
+
+    private fun updateSubtotal() {
+        tvSubtotal.text = "Subtotal: $${String.format("%.2f", adapter.getTotalPrice())}"
     }
 }

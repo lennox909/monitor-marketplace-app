@@ -23,12 +23,12 @@ class CartAdapter(
 ) : RecyclerView.Adapter<CartAdapter.VH>() {
 
     class VH(v: View) : RecyclerView.ViewHolder(v) {
-        val tvTitle : TextView = v.findViewById(R.id.tvItemTitle)
-        val tvPrice : TextView = v.findViewById(R.id.tvItemPrice)
-        val tvQty   : TextView = v.findViewById(R.id.tvQty)
-        val btnMinus: Button   = v.findViewById(R.id.btnMinus)
-        val btnPlus : Button   = v.findViewById(R.id.btnPlus)
-        val btnRemove: Button  = v.findViewById(R.id.btnRemove)
+        val tvTitle  : TextView = v.findViewById(R.id.tvItemTitle)
+        val tvPrice  : TextView = v.findViewById(R.id.tvItemPrice)
+        val tvQty    : TextView = v.findViewById(R.id.tvQty)
+        val btnMinus : Button   = v.findViewById(R.id.btnMinus)
+        val btnPlus  : Button   = v.findViewById(R.id.btnPlus)
+        val btnRemove: Button   = v.findViewById(R.id.btnRemove)
     }
 
     fun setData(newItems: List<CartRow>) {
@@ -45,13 +45,39 @@ class CartAdapter(
     override fun onBindViewHolder(h: VH, position: Int) {
         val row = items[position]
         h.tvTitle.text = row.title
-        h.tvPrice.text = "$${String.format("%.2f", row.price)}"
+        h.tvPrice.text = "$${String.format("%.2f", row.price * row.qty)}"
         h.tvQty.text   = row.qty.toString()
 
-        h.btnMinus.setOnClickListener  { onQtyChanged(row, row.qty - 1) }
-        h.btnPlus.setOnClickListener   { onQtyChanged(row, row.qty + 1) }
-        h.btnRemove.setOnClickListener { onRemove(row) }
+        h.btnPlus.setOnClickListener {
+            val pos = h.adapterPosition
+            if (pos == RecyclerView.NO_ID.toInt()) return@setOnClickListener
+            items[pos].qty++
+            h.tvQty.text   = items[pos].qty.toString()
+            h.tvPrice.text = "$${String.format("%.2f", items[pos].price * items[pos].qty)}"
+            onQtyChanged(items[pos], items[pos].qty)
+        }
+
+        h.btnMinus.setOnClickListener {
+            val pos = h.adapterPosition
+            if (pos == RecyclerView.NO_ID.toInt()) return@setOnClickListener
+            if (items[pos].qty <= 1) {
+                onRemove(items[pos])
+            } else {
+                items[pos].qty--
+                h.tvQty.text   = items[pos].qty.toString()
+                h.tvPrice.text = "$${String.format("%.2f", items[pos].price * items[pos].qty)}"
+                onQtyChanged(items[pos], items[pos].qty)
+            }
+        }
+
+        h.btnRemove.setOnClickListener {
+            val pos = h.adapterPosition
+            if (pos == RecyclerView.NO_ID.toInt()) return@setOnClickListener
+            onRemove(items[pos])
+        }
     }
 
     override fun getItemCount() = items.size
+
+    fun getTotalPrice(): Double = items.sumOf { it.price * it.qty }
 }

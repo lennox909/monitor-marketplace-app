@@ -7,6 +7,7 @@ import android.text.InputFilter
 import android.text.TextWatcher
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
+import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.example.myfirstapp.R
 import com.example.myfirstapp.data.DatabaseHelper
 
@@ -34,33 +35,36 @@ class CheckoutActivity : AppCompatActivity() {
         val etCardName   = findViewById<EditText>(R.id.etCardName)
         val tvCardType   = findViewById<TextView>(R.id.tvCardType)
         val btnPlace     = findViewById<Button>(R.id.btnPlaceOrder)
+        val bottomNav    = findViewById<BottomNavigationView>(R.id.bottomNav)
 
-        // Card number: max 19 chars (16 digits + 3 spaces)
+        // Guard — if cart is empty send back
+        Thread {
+            val cartItems = db.getCartItems(Session.userId)
+            runOnUiThread {
+                if (cartItems.isEmpty()) {
+                    Toast.makeText(this, "Your cart is empty", Toast.LENGTH_SHORT).show()
+                    finish()
+                }
+            }
+        }.start()
+
+        // Card number max 19 chars
         etCardNumber.filters = arrayOf(InputFilter.LengthFilter(19))
+        etExpiry.filters     = arrayOf(InputFilter.LengthFilter(5))
 
-        // Expiry: max 5 chars (MM/YY)
-        etExpiry.filters = arrayOf(InputFilter.LengthFilter(5))
-
-        // Auto-format card number with spaces every 4 digits
+        // Auto-format card number
         etCardNumber.addTextChangedListener(object : TextWatcher {
             override fun afterTextChanged(s: Editable?) {
                 if (isFormattingCard) return
                 isFormattingCard = true
-
-                val digits  = s.toString().replace(" ", "")
-                val limited = digits.take(16)
+                val digits    = s.toString().replace(" ", "")
+                val limited   = digits.take(16)
                 val formatted = limited.chunked(4).joinToString(" ")
-
                 etCardNumber.setText(formatted)
                 etCardNumber.setSelection(formatted.length)
-
-                // Detect card type
                 tvCardType.text = detectCardType(limited)
-
-                // Update CVV max length based on card type
                 val isAmex = limited.startsWith("34") || limited.startsWith("37")
                 etCVV.filters = arrayOf(InputFilter.LengthFilter(if (isAmex) 4 else 3))
-
                 isFormattingCard = false
             }
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
@@ -72,7 +76,6 @@ class CheckoutActivity : AppCompatActivity() {
             override fun afterTextChanged(s: Editable?) {
                 if (isFormattingExpiry) return
                 isFormattingExpiry = true
-
                 val digits    = s.toString().replace("/", "")
                 val limited   = digits.take(4)
                 val formatted = when {
@@ -80,15 +83,53 @@ class CheckoutActivity : AppCompatActivity() {
                     limited.length == 2 -> "$limited/"
                     else -> limited
                 }
-
                 etExpiry.setText(formatted)
                 etExpiry.setSelection(formatted.length)
-
                 isFormattingExpiry = false
             }
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
         })
+
+        // Bottom nav
+        bottomNav.selectedItemId = R.id.nav_cart
+        bottomNav.setOnItemSelectedListener { item ->
+            when (item.itemId) {
+                R.id.nav_home -> {
+                    val i = Intent(this, MainActivity::class.java)
+                    i.flags = Intent.FLAG_ACTIVITY_REORDER_TO_FRONT
+                    startActivity(i)
+                    @Suppress("DEPRECATION")
+                    overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
+                    finish()
+                    true
+                }
+                R.id.nav_sell -> {
+                    Session.isBuyMode = false
+                    startActivity(Intent(this, AddEditListingActivity::class.java))
+                    true
+                }
+                R.id.nav_cart -> {
+                    val i = Intent(this, CartActivity::class.java)
+                    i.flags = Intent.FLAG_ACTIVITY_REORDER_TO_FRONT
+                    startActivity(i)
+                    @Suppress("DEPRECATION")
+                    overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
+                    finish()
+                    true
+                }
+                R.id.nav_profile -> {
+                    val i = Intent(this, ProfileActivity::class.java)
+                    i.flags = Intent.FLAG_ACTIVITY_REORDER_TO_FRONT
+                    startActivity(i)
+                    @Suppress("DEPRECATION")
+                    overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
+                    finish()
+                    true
+                }
+                else -> false
+            }
+        }
 
         btnPlace.setOnClickListener {
             val firstName  = etFirstName.text.toString().trim()
@@ -102,14 +143,12 @@ class CheckoutActivity : AppCompatActivity() {
             val cvv        = etCVV.text.toString().trim()
             val cardName   = etCardName.text.toString().trim()
 
-            // Validate shipping
             if (firstName.isEmpty() || lastName.isEmpty() || address.isEmpty() ||
                 city.isEmpty() || state.isEmpty() || zip.isEmpty()) {
                 Toast.makeText(this, "Please fill in all shipping fields", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
 
-            // Validate card fields
             if (cardNumber.isEmpty() || expiry.isEmpty() || cvv.isEmpty() || cardName.isEmpty()) {
                 Toast.makeText(this, "Please fill in all card fields", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
@@ -139,22 +178,19 @@ class CheckoutActivity : AppCompatActivity() {
             btnPlace.isEnabled = false
             btnPlace.text      = "Processing..."
 
-            val cardType     = detectCardType(cardNumber)
-            val shippingInfo = "$firstName $lastName, $address, $city, $state $zip"
+            val cardType      = detectCardType(cardNumber)
+            val shippingInfo  = "$firstName $lastName, $address, $city, $state $zip"
             val paymentMethod = "$cardType ending in ${cardNumber.takeLast(4)}"
 
             Thread {
                 val orderId = db.placeOrder(Session.userId, shippingInfo, paymentMethod)
-
                 runOnUiThread {
                     btnPlace.isEnabled = true
                     btnPlace.text      = "Place Order"
-
                     if (orderId <= 0) {
                         Toast.makeText(this, "Checkout failed — cart may be empty", Toast.LENGTH_SHORT).show()
                         return@runOnUiThread
                     }
-
                     val i = Intent(this, OrderConfirmationActivity::class.java)
                     i.putExtra("ORDER_ID", orderId)
                     startActivity(i)
@@ -166,11 +202,11 @@ class CheckoutActivity : AppCompatActivity() {
 
     private fun detectCardType(number: String): String {
         return when {
-            number.startsWith("4")                              -> "Visa"
-            number.startsWith("34") || number.startsWith("37") -> "Amex"
-            number.take(2).toIntOrNull()?.let { it in 51..55 } == true -> "Mastercard"
-            number.take(4).toIntOrNull()?.let { it in 2221..2720 } == true -> "Mastercard"
-            number.startsWith("6011") || number.startsWith("65") -> "Discover"
+            number.startsWith("4")                                                   -> "Visa"
+            number.startsWith("34") || number.startsWith("37")                       -> "Amex"
+            number.take(2).toIntOrNull()?.let { it in 51..55 } == true              -> "Mastercard"
+            number.take(4).toIntOrNull()?.let { it in 2221..2720 } == true          -> "Mastercard"
+            number.startsWith("6011") || number.startsWith("65")                    -> "Discover"
             else -> "Card"
         }
     }
