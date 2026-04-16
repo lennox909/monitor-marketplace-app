@@ -1,15 +1,15 @@
 package com.example.myfirstapp.userinterface
 
-import android.app.AlertDialog
 import android.content.Intent
+import android.graphics.Color
+import android.graphics.Typeface
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
-import android.view.LayoutInflater
 import android.view.View
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
-import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.example.myfirstapp.R
@@ -22,10 +22,10 @@ class MainActivity : AppCompatActivity() {
     private lateinit var adapter: ListingAdapter
     private var allListings: List<Listing> = emptyList()
 
-    private var filterCategory  = "All Categories"
-    private var filterCondition = "All Conditions"
-    private var filterMinPrice  : Double? = null
-    private var filterMaxPrice  : Double? = null
+    private var selectedCategory = "All"
+    private var searchQuery      = ""
+
+    private val categories = listOf("All", "Gaming", "Office", "4K", "Ultrawide", "General")
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -42,11 +42,11 @@ class MainActivity : AppCompatActivity() {
         val tvEmpty       = findViewById<TextView>(R.id.tvEmpty)
         val progressBar   = findViewById<ProgressBar>(R.id.progressBar)
         val etSearch      = findViewById<EditText>(R.id.etSearch)
-        val btnFilter     = findViewById<Button>(R.id.btnFilter)
         val buyerControls = findViewById<LinearLayout>(R.id.buyerControls)
+        val categoryChips = findViewById<LinearLayout>(R.id.categoryChips)
         val bottomNav     = findViewById<BottomNavigationView>(R.id.bottomNav)
 
-        recycler.layoutManager = LinearLayoutManager(this)
+        recycler.layoutManager = GridLayoutManager(this, 2)
         adapter = ListingAdapter(emptyList()) { listingId ->
             val i = Intent(this, ListingDetailActivity::class.java)
             i.putExtra("LISTING_ID", listingId)
@@ -54,22 +54,29 @@ class MainActivity : AppCompatActivity() {
         }
         recycler.adapter = adapter
 
+        buildCategoryChips(categoryChips, recycler, tvEmpty)
+
         switchMode.isChecked = Session.isBuyMode
         updateModeUI(Session.isBuyMode, tvWelcome, tvModeLabel, btnAddListing, buyerControls, bottomNav)
 
         switchMode.setOnCheckedChangeListener { _, isChecked ->
             Session.isBuyMode = isChecked
+            selectedCategory  = "All"
+            searchQuery       = ""
+            etSearch.setText("")
             updateModeUI(isChecked, tvWelcome, tvModeLabel, btnAddListing, buyerControls, bottomNav)
+            buildCategoryChips(categoryChips, recycler, tvEmpty)
             loadListings(progressBar, tvEmpty, recycler, etSearch)
         }
 
         etSearch.addTextChangedListener(object : TextWatcher {
-            override fun afterTextChanged(s: Editable?) { applyFilters(s.toString(), tvEmpty, recycler) }
+            override fun afterTextChanged(s: Editable?) {
+                searchQuery = s.toString()
+                applyFilters(tvEmpty, recycler)
+            }
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
         })
-
-        btnFilter.setOnClickListener { showFilterDialog(tvEmpty, recycler) }
 
         btnAddListing.setOnClickListener {
             startActivity(Intent(this, AddEditListingActivity::class.java))
@@ -83,11 +90,22 @@ class MainActivity : AppCompatActivity() {
             finish()
         }
 
-        // Bottom nav
+        // Bottom nav - 4 tabs
         bottomNav.selectedItemId = R.id.nav_home
         bottomNav.setOnItemSelectedListener { item ->
             when (item.itemId) {
                 R.id.nav_home -> true
+
+                R.id.nav_sell -> {
+                    Session.isBuyMode    = false
+                    switchMode.isChecked = false
+                    updateModeUI(false, tvWelcome, tvModeLabel, btnAddListing, buyerControls, bottomNav)
+                    buildCategoryChips(categoryChips, recycler, tvEmpty)
+                    loadListings(progressBar, tvEmpty, recycler, etSearch)
+                    startActivity(Intent(this, AddEditListingActivity::class.java))
+                    true
+                }
+
                 R.id.nav_cart -> {
                     startActivity(Intent(this, CartActivity::class.java))
                     @Suppress("DEPRECATION")
@@ -95,6 +113,7 @@ class MainActivity : AppCompatActivity() {
                     finish()
                     true
                 }
+
                 R.id.nav_profile -> {
                     startActivity(Intent(this, ProfileActivity::class.java))
                     @Suppress("DEPRECATION")
@@ -102,6 +121,7 @@ class MainActivity : AppCompatActivity() {
                     finish()
                     true
                 }
+
                 else -> false
             }
         }
@@ -109,58 +129,56 @@ class MainActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        val progressBar = findViewById<ProgressBar>(R.id.progressBar)
-        val tvEmpty     = findViewById<TextView>(R.id.tvEmpty)
-        val recycler    = findViewById<RecyclerView>(R.id.recyclerView)
-        val etSearch    = findViewById<EditText>(R.id.etSearch)
-        val bottomNav   = findViewById<BottomNavigationView>(R.id.bottomNav)
+        val progressBar   = findViewById<ProgressBar>(R.id.progressBar)
+        val tvEmpty       = findViewById<TextView>(R.id.tvEmpty)
+        val recycler      = findViewById<RecyclerView>(R.id.recyclerView)
+        val etSearch      = findViewById<EditText>(R.id.etSearch)
+        val bottomNav     = findViewById<BottomNavigationView>(R.id.bottomNav)
+        val tvWelcome     = findViewById<TextView>(R.id.tvWelcome)
+        val tvModeLabel   = findViewById<TextView>(R.id.tvModeLabel)
+        val btnAddListing = findViewById<Button>(R.id.btnAddListing)
+        val buyerControls = findViewById<LinearLayout>(R.id.buyerControls)
+        val categoryChips = findViewById<LinearLayout>(R.id.categoryChips)
+
         bottomNav.selectedItemId = R.id.nav_home
+        updateModeUI(Session.isBuyMode, tvWelcome, tvModeLabel, btnAddListing, buyerControls, bottomNav)
+        buildCategoryChips(categoryChips, recycler, tvEmpty)
         loadListings(progressBar, tvEmpty, recycler, etSearch)
     }
 
-    private fun showFilterDialog(tvEmpty: TextView, recycler: RecyclerView) {
-        val view = LayoutInflater.from(this).inflate(R.layout.dialog_filter, null)
+    private fun buildCategoryChips(
+        container: LinearLayout,
+        recycler: RecyclerView,
+        tvEmpty: TextView
+    ) {
+        container.removeAllViews()
+        categories.forEach { cat ->
+            val chip = TextView(this).apply {
+                text     = cat
+                textSize = 13f
+                setPadding(32, 16, 32, 16)
+                setTypeface(null, Typeface.BOLD)
+                layoutParams = LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.WRAP_CONTENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT
+                ).apply { setMargins(0, 0, 8, 0) }
 
-        val spCategory  = view.findViewById<Spinner>(R.id.spFilterCategory)
-        val spCondition = view.findViewById<Spinner>(R.id.spFilterCondition)
-        val etMinPrice  = view.findViewById<EditText>(R.id.etFilterMinPrice)
-        val etMaxPrice  = view.findViewById<EditText>(R.id.etFilterMaxPrice)
+                if (cat == selectedCategory) {
+                    setBackgroundResource(R.drawable.chip_selected)
+                    setTextColor(Color.WHITE)
+                } else {
+                    setBackgroundResource(R.drawable.chip_unselected)
+                    setTextColor(Color.parseColor("#374151"))
+                }
 
-        val categories = listOf("All Categories", "Gaming", "Office", "4K", "Ultrawide", "General")
-        val conditions = listOf("All Conditions", "New", "Like New", "Used")
-
-        spCategory.adapter  = ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item, categories)
-        spCondition.adapter = ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item, conditions)
-
-        spCategory.setSelection(categories.indexOf(filterCategory).coerceAtLeast(0))
-        spCondition.setSelection(conditions.indexOf(filterCondition).coerceAtLeast(0))
-        etMinPrice.setText(filterMinPrice?.toString() ?: "")
-        etMaxPrice.setText(filterMaxPrice?.toString() ?: "")
-
-        AlertDialog.Builder(this)
-            .setTitle("Filter Listings")
-            .setView(view)
-            .setPositiveButton("Apply") { _, _ ->
-                filterCategory  = spCategory.selectedItem.toString()
-                filterCondition = spCondition.selectedItem.toString()
-                filterMinPrice  = etMinPrice.text.toString().toDoubleOrNull()
-                filterMaxPrice  = etMaxPrice.text.toString().toDoubleOrNull()
-                val hasFilter = filterCategory != "All Categories" ||
-                        filterCondition != "All Conditions" ||
-                        filterMinPrice != null || filterMaxPrice != null
-                findViewById<Button>(R.id.btnFilter).text = if (hasFilter) "Filter ●" else "Filter"
-                applyFilters(findViewById<EditText>(R.id.etSearch).text.toString(), tvEmpty, recycler)
+                setOnClickListener {
+                    selectedCategory = cat
+                    buildCategoryChips(container, recycler, tvEmpty)
+                    applyFilters(tvEmpty, recycler)
+                }
             }
-            .setNegativeButton("Clear") { _, _ ->
-                filterCategory  = "All Categories"
-                filterCondition = "All Conditions"
-                filterMinPrice  = null
-                filterMaxPrice  = null
-                findViewById<Button>(R.id.btnFilter).text = "Filter"
-                applyFilters(findViewById<EditText>(R.id.etSearch).text.toString(), tvEmpty, recycler)
-            }
-            .setNeutralButton("Cancel", null)
-            .show()
+            container.addView(chip)
+        }
     }
 
     private fun updateModeUI(
@@ -172,17 +190,17 @@ class MainActivity : AppCompatActivity() {
         bottomNav: BottomNavigationView
     ) {
         if (isBuyMode) {
-            tvWelcome.text           = "Monitor Marketplace"
+            tvWelcome.text           = "Monitor Exchange"
             tvModeLabel.text         = "Buy Mode"
             btnAdd.visibility        = View.GONE
             buyerControls.visibility = View.VISIBLE
-            bottomNav.menu.findItem(R.id.nav_cart).isVisible = true
+            bottomNav.menu.findItem(R.id.nav_cart)?.isVisible = true
         } else {
             tvWelcome.text           = "My Listings"
             tvModeLabel.text         = "Sell Mode"
             btnAdd.visibility        = View.VISIBLE
             buyerControls.visibility = View.GONE
-            bottomNav.menu.findItem(R.id.nav_cart).isVisible = false
+            bottomNav.menu.findItem(R.id.nav_cart)?.isVisible = false
         }
     }
 
@@ -205,23 +223,20 @@ class MainActivity : AppCompatActivity() {
             runOnUiThread {
                 allListings            = listings
                 progressBar.visibility = View.GONE
-                applyFilters(etSearch.text.toString(), tvEmpty, recycler)
+                searchQuery            = etSearch.text.toString()
+                applyFilters(tvEmpty, recycler)
             }
         }.start()
     }
 
-    private fun applyFilters(query: String, tvEmpty: TextView, recycler: RecyclerView) {
+    private fun applyFilters(tvEmpty: TextView, recycler: RecyclerView) {
         val filtered = allListings.filter { listing ->
-            val matchesSearch    = query.isBlank() ||
-                    listing.title.contains(query, ignoreCase = true) ||
-                    listing.brand.contains(query, ignoreCase = true)
-            val matchesCategory  = filterCategory == "All Categories" ||
-                    listing.category.equals(filterCategory, ignoreCase = true)
-            val matchesCondition = filterCondition == "All Conditions" ||
-                    listing.condition.equals(filterCondition, ignoreCase = true)
-            val matchesMin       = filterMinPrice == null || listing.price >= filterMinPrice!!
-            val matchesMax       = filterMaxPrice == null || listing.price <= filterMaxPrice!!
-            matchesSearch && matchesCategory && matchesCondition && matchesMin && matchesMax
+            val matchesSearch   = searchQuery.isBlank() ||
+                    listing.title.contains(searchQuery, ignoreCase = true) ||
+                    listing.brand.contains(searchQuery, ignoreCase = true)
+            val matchesCategory = selectedCategory == "All" ||
+                    listing.category.equals(selectedCategory, ignoreCase = true)
+            matchesSearch && matchesCategory
         }
 
         adapter.updateData(filtered)

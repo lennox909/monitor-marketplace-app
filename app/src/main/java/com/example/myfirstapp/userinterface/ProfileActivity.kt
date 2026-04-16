@@ -27,7 +27,6 @@ class ProfileActivity : AppCompatActivity() {
         val btnLogout      = findViewById<LinearLayout>(R.id.btnLogout)
         val bottomNav      = findViewById<BottomNavigationView>(R.id.bottomNav)
 
-        // Load user info
         Thread {
             val db   = DatabaseHelper.getInstance(this)
             val user = db.getUserById(Session.userId)
@@ -40,9 +39,8 @@ class ProfileActivity : AppCompatActivity() {
             }
         }.start()
 
-        // Show My Orders for buy mode, My Listings for sell mode
         if (Session.isBuyMode) {
-            btnMyOrders.visibility  = View.VISIBLE
+            btnMyOrders.visibility   = View.VISIBLE
             dividerOrders.visibility = View.VISIBLE
             btnMyListings.visibility = View.GONE
         } else {
@@ -86,7 +84,6 @@ class ProfileActivity : AppCompatActivity() {
             finish()
         }
 
-        // Bottom nav
         bottomNav.selectedItemId = R.id.nav_profile
         bottomNav.setOnItemSelectedListener { item ->
             when (item.itemId) {
@@ -97,6 +94,11 @@ class ProfileActivity : AppCompatActivity() {
                     @Suppress("DEPRECATION")
                     overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
                     finish()
+                    true
+                }
+                R.id.nav_sell -> {
+                    Session.isBuyMode = false
+                    startActivity(Intent(this, AddEditListingActivity::class.java))
                     true
                 }
                 R.id.nav_cart -> {
@@ -132,29 +134,24 @@ class ProfileActivity : AppCompatActivity() {
         val parts = name.trim().split(" ")
         return if (parts.size >= 2)
             "${parts[0].first().uppercaseChar()}${parts[1].first().uppercaseChar()}"
-        else
-            name.take(2).uppercase()
+        else name.take(2).uppercase()
     }
 
     private fun createAvatarBitmap(initials: String, colorHex: String): Bitmap {
         val size   = 200
         val bitmap = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(bitmap)
-
-        val paint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            color = Color.parseColor(colorHex)
-        }
-        canvas.drawCircle(size / 2f, size / 2f, size / 2f, paint)
-
-        val textPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        Paint(Paint.ANTI_ALIAS_FLAG).apply { color = Color.parseColor(colorHex) }
+            .also { canvas.drawCircle(size / 2f, size / 2f, size / 2f, it) }
+        Paint(Paint.ANTI_ALIAS_FLAG).apply {
             color     = Color.WHITE
             textSize  = 72f
             textAlign = Paint.Align.CENTER
             typeface  = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
+        }.also {
+            val yPos = (size / 2f) - ((it.descent() + it.ascent()) / 2f)
+            canvas.drawText(initials, size / 2f, yPos, it)
         }
-        val yPos = (size / 2f) - ((textPaint.descent() + textPaint.ascent()) / 2f)
-        canvas.drawText(initials, size / 2f, yPos, textPaint)
-
         return bitmap
     }
 }

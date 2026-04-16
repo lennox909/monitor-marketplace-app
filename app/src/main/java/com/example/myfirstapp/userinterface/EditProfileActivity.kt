@@ -95,7 +95,6 @@ class EditProfileActivity : AppCompatActivity() {
             }.start()
         }
 
-        // Bottom nav - profile selected
         bottomNav.selectedItemId = R.id.nav_profile
         bottomNav.setOnItemSelectedListener { item ->
             when (item.itemId) {
@@ -106,6 +105,11 @@ class EditProfileActivity : AppCompatActivity() {
                     @Suppress("DEPRECATION")
                     overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
                     finish()
+                    true
+                }
+                R.id.nav_sell -> {
+                    Session.isBuyMode = false
+                    startActivity(Intent(this, AddEditListingActivity::class.java))
                     true
                 }
                 R.id.nav_cart -> {

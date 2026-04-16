@@ -35,11 +35,8 @@ class CartActivity : AppCompatActivity() {
             items = mutableListOf(),
             onQtyChanged = { row, newQty ->
                 Thread {
-                    if (newQty <= 0) {
-                        db.removeCartItem(row.cartItemId)
-                    } else {
-                        db.updateCartItemQuantity(row.cartItemId, newQty)
-                    }
+                    if (newQty <= 0) db.removeCartItem(row.cartItemId)
+                    else db.updateCartItemQuantity(row.cartItemId, newQty)
                     runOnUiThread { loadCart(rvCart, tvSubtotal, tvEmpty, progress) }
                 }.start()
             },
@@ -52,7 +49,6 @@ class CartActivity : AppCompatActivity() {
         )
         rvCart.adapter = adapter
 
-        // Bottom nav
         bottomNav.selectedItemId = R.id.nav_cart
         bottomNav.setOnItemSelectedListener { item ->
             when (item.itemId) {
@@ -63,6 +59,11 @@ class CartActivity : AppCompatActivity() {
                     @Suppress("DEPRECATION")
                     overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
                     finish()
+                    true
+                }
+                R.id.nav_sell -> {
+                    Session.isBuyMode = false
+                    startActivity(Intent(this, AddEditListingActivity::class.java))
                     true
                 }
                 R.id.nav_cart -> true
@@ -120,7 +121,6 @@ class CartActivity : AppCompatActivity() {
 
             runOnUiThread {
                 progress.visibility = View.GONE
-
                 if (rows.isEmpty()) {
                     tvEmpty.visibility = View.VISIBLE
                     rvCart.visibility  = View.GONE

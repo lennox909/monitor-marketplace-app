@@ -3,12 +3,12 @@
 
     <style name="Theme.MyFirstApp" parent="Theme.MaterialComponents.DayNight.NoActionBar">
         <item name="android:windowAnimationStyle">@style/WindowAnimationStyle</item>
-        <item name="android:statusBarColor">#FF6A00</item>
+        <item name="android:statusBarColor">@color/accent_orange</item>
         <item name="android:navigationBarColor">@color/bg_primary</item>
         <item name="android:windowBackground">@color/bg_primary</item>
-        <item name="colorPrimary">#F97316</item>
-        <item name="colorPrimaryVariant">#EA6C00</item>
-        <item name="colorOnPrimary">#FFFFFF</item>
+        <item name="colorPrimary">@color/accent_orange</item>
+        <item name="colorPrimaryVariant">@color/accent_orange_dark</item>
+        <item name="colorOnPrimary">@color/on_primary</item>
     </style>
 
     <style name="WindowAnimationStyle" parent="@android:style/Animation.Activity">

@@ -2,12 +2,11 @@ package com.example.myfirstapp.userinterface
 
 import android.content.Intent
 import android.os.Bundle
+import android.widget.Switch
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import com.google.android.material.bottomnavigation.BottomNavigationView
-import com.google.android.material.switchmaterial.SwitchMaterial
 import com.example.myfirstapp.R
-
 
 class SettingsActivity : AppCompatActivity() {
 
@@ -15,7 +14,7 @@ class SettingsActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_settings)
 
-        val switchDarkMode = findViewById<SwitchMaterial>(R.id.switchDarkMode)
+        val switchDarkMode = findViewById<android.widget.Switch>(R.id.switchDarkMode)
         val bottomNav      = findViewById<BottomNavigationView>(R.id.bottomNav)
         val prefs          = getSharedPreferences("app_settings", MODE_PRIVATE)
 
@@ -29,7 +28,6 @@ class SettingsActivity : AppCompatActivity() {
             )
         }
 
-        // Bottom nav - profile selected
         bottomNav.selectedItemId = R.id.nav_profile
         bottomNav.setOnItemSelectedListener { item ->
             when (item.itemId) {
@@ -40,6 +38,11 @@ class SettingsActivity : AppCompatActivity() {
                     @Suppress("DEPRECATION")
                     overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
                     finish()
+                    true
+                }
+                R.id.nav_sell -> {
+                    Session.isBuyMode = false
+                    startActivity(Intent(this, AddEditListingActivity::class.java))
                     true
                 }
                 R.id.nav_cart -> {

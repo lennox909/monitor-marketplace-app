@@ -10,8 +10,7 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:orientation="vertical"
-        android:padding="16dp">
+        android:orientation="vertical">
 
         <!-- Header -->
         <LinearLayout
@@ -19,15 +18,18 @@
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:gravity="center_vertical"
-            android:layout_marginBottom="10dp">
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:paddingTop="16dp"
+            android:paddingBottom="8dp">
 
             <TextView
                 android:id="@+id/tvWelcome"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="Monitor Marketplace"
-                android:textSize="20sp"
+                android:text="Monitor Exchange"
+                android:textSize="22sp"
                 android:textStyle="bold"
                 android:textColor="@color/text_primary" />
 
@@ -48,7 +50,9 @@
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:gravity="center_vertical"
-            android:layout_marginBottom="10dp">
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:layout_marginBottom="8dp">
 
             <TextView
                 android:id="@+id/tvModeLabel"
@@ -82,7 +86,7 @@
 
         </LinearLayout>
 
-        <!-- Seller: Add Listing -->
+        <!-- Sell mode: Add listing button -->
         <Button
             android:id="@+id/btnAddListing"
             android:layout_width="match_parent"
@@ -93,34 +97,44 @@
             android:textColor="#FFFFFF"
             android:backgroundTint="#F97316"
             android:visibility="gone"
-            android:layout_marginBottom="10dp" />
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginBottom="8dp" />
 
-        <!-- Buyer controls -->
+        <!-- Buy mode: Search bar -->
         <LinearLayout
             android:id="@+id/buyerControls"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:layout_marginBottom="8dp">
+            android:orientation="vertical"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp">
 
             <EditText
                 android:id="@+id/etSearch"
-                android:layout_width="0dp"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:hint="Search by title or brand..."
+                android:hint="Search monitors..."
                 android:inputType="text"
-                android:layout_marginEnd="8dp" />
+                android:drawableStart="@android:drawable/ic_menu_search"
+                android:drawablePadding="8dp"
+                android:layout_marginBottom="8dp" />
 
-            <Button
-                android:id="@+id/btnFilter"
-                android:layout_width="wrap_content"
+            <!-- Category chips -->
+            <HorizontalScrollView
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Filter"
-                android:textAllCaps="false"
-                android:textStyle="bold"
-                android:textColor="#FFFFFF"
-                android:backgroundTint="#1F2A44" />
+                android:scrollbars="none"
+                android:layout_marginBottom="8dp">
+
+                <LinearLayout
+                    android:id="@+id/categoryChips"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:padding="2dp" />
+
+            </HorizontalScrollView>
 
         </LinearLayout>
 
@@ -144,12 +158,14 @@
             android:visibility="gone"
             android:layout_marginTop="40dp" />
 
-        <!-- Listings -->
+        <!-- Grid listings -->
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/recyclerView"
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="1" />
+            android:layout_weight="1"
+            android:paddingStart="8dp"
+            android:paddingEnd="8dp" />
 
     </LinearLayout>
 

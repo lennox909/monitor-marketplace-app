@@ -42,23 +42,18 @@ class ListingAdapter(
 
         holder.tvTitle.text     = listing.title
         holder.tvPrice.text     = "$${String.format("%.2f", listing.price)}"
-        holder.tvBrand.text     = "${listing.brand} • ${listing.screenSize}"
+        holder.tvBrand.text     = listing.brand
         holder.tvCondition.text = listing.condition
 
-        // Show status badge only in sell mode
         if (!Session.isBuyMode) {
             holder.tvStatus.visibility = View.VISIBLE
             when (listing.status) {
-                "ACTIVE" -> {
+                "ACTIVE"  -> {
                     holder.tvStatus.text = "● In Stock"
                     holder.tvStatus.setTextColor(Color.parseColor("#F97316"))
                 }
                 "REMOVED" -> {
                     holder.tvStatus.text = "● Sold Out"
-                    holder.tvStatus.setTextColor(Color.parseColor("#6B7280"))
-                }
-                "SOLD" -> {
-                    holder.tvStatus.text = "● Out of Stock"
                     holder.tvStatus.setTextColor(Color.parseColor("#6B7280"))
                 }
                 else -> {
@@ -70,7 +65,6 @@ class ListingAdapter(
             holder.tvStatus.visibility = View.GONE
         }
 
-        // Load thumbnail
         if (!listing.photoUri.isNullOrEmpty()) {
             try {
                 val file = File(listing.photoUri)
