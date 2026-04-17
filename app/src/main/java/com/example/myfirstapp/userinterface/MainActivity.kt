@@ -22,8 +22,10 @@ class MainActivity : AppCompatActivity() {
     private lateinit var adapter: ListingAdapter
     private var allListings: List<Listing> = emptyList()
 
-    private var selectedCategory = "All"
-    private var searchQuery      = ""
+    private var selectedCategory  = "All"
+    private var searchQuery       = ""
+    private var needsRefresh      = true  // only reload when needed
+    private var lastMode          = Session.isBuyMode
 
     private val categories = listOf("All", "Gaming", "Office", "4K", "Ultrawide", "General")
 
@@ -55,7 +57,6 @@ class MainActivity : AppCompatActivity() {
         recycler.adapter = adapter
 
         buildCategoryChips(categoryChips, recycler, tvEmpty)
-
         switchMode.isChecked = Session.isBuyMode
         updateModeUI(Session.isBuyMode, tvWelcome, tvModeLabel, btnAddListing, buyerControls, bottomNav)
 
@@ -63,6 +64,7 @@ class MainActivity : AppCompatActivity() {
             Session.isBuyMode = isChecked
             selectedCategory  = "All"
             searchQuery       = ""
+            needsRefresh      = true
             etSearch.setText("")
             updateModeUI(isChecked, tvWelcome, tvModeLabel, btnAddListing, buyerControls, bottomNav)
             buildCategoryChips(categoryChips, recycler, tvEmpty)
@@ -79,6 +81,7 @@ class MainActivity : AppCompatActivity() {
         })
 
         btnAddListing.setOnClickListener {
+            needsRefresh = true
             startActivity(Intent(this, AddEditListingActivity::class.java))
         }
 
@@ -86,11 +89,11 @@ class MainActivity : AppCompatActivity() {
             Session.userId    = -1L
             Session.role      = "USER"
             Session.isBuyMode = true
+            needsRefresh      = true
             startActivity(Intent(this, LoginActivity::class.java))
             finish()
         }
 
-        // Bottom nav
         bottomNav.selectedItemId = R.id.nav_home
         bottomNav.setOnItemSelectedListener { item ->
             when (item.itemId) {
@@ -98,6 +101,7 @@ class MainActivity : AppCompatActivity() {
 
                 R.id.nav_sell -> {
                     Session.isBuyMode    = false
+                    needsRefresh         = true
                     switchMode.isChecked = false
                     updateModeUI(false, tvWelcome, tvModeLabel, btnAddListing, buyerControls, bottomNav)
                     buildCategoryChips(categoryChips, recycler, tvEmpty)
@@ -127,6 +131,10 @@ class MainActivity : AppCompatActivity() {
                 else -> false
             }
         }
+
+        // Initial load
+        loadListings(progressBar, tvEmpty, recycler, etSearch)
+        needsRefresh = false
     }
 
     override fun onResume() {
@@ -143,9 +151,23 @@ class MainActivity : AppCompatActivity() {
         val categoryChips = findViewById<LinearLayout>(R.id.categoryChips)
 
         bottomNav.selectedItemId = R.id.nav_home
-        updateModeUI(Session.isBuyMode, tvWelcome, tvModeLabel, btnAddListing, buyerControls, bottomNav)
-        buildCategoryChips(categoryChips, recycler, tvEmpty)
-        loadListings(progressBar, tvEmpty, recycler, etSearch)
+
+        // Only reload if mode changed or data was modified
+        val modeChanged = lastMode != Session.isBuyMode
+        if (modeChanged) {
+            updateModeUI(Session.isBuyMode, tvWelcome, tvModeLabel, btnAddListing, buyerControls, bottomNav)
+            buildCategoryChips(categoryChips, recycler, tvEmpty)
+            lastMode = Session.isBuyMode
+            needsRefresh = true
+        }
+
+        if (needsRefresh || allListings.isEmpty()) {
+            loadListings(progressBar, tvEmpty, recycler, etSearch)
+            needsRefresh = false
+        } else {
+            // Just reapply filters instantly — no DB call
+            applyFilters(tvEmpty, recycler)
+        }
     }
 
     private fun buildCategoryChips(
@@ -213,8 +235,6 @@ class MainActivity : AppCompatActivity() {
         etSearch: EditText
     ) {
         progressBar.visibility = View.VISIBLE
-        recycler.visibility    = View.GONE
-        tvEmpty.visibility     = View.GONE
 
         Thread {
             val listings = if (Session.isBuyMode)

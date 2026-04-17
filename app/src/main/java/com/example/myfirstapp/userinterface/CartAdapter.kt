@@ -36,6 +36,19 @@ class CartAdapter(
         notifyDataSetChanged()
     }
 
+    // Remove item by cartItemId instantly with animation
+    fun removeItemById(cartItemId: Long) {
+        val pos = items.indexOfFirst { it.cartItemId == cartItemId }
+        if (pos == -1) return
+        items.removeAt(pos)
+        notifyItemRemoved(pos)
+        notifyItemRangeChanged(pos, items.size)
+    }
+
+    fun getTotalPrice(): Double = items.sumOf { it.price * it.qty }
+
+    fun isEmpty(): Boolean = items.isEmpty()
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VH {
         val v = LayoutInflater.from(parent.context)
             .inflate(R.layout.item_cart, parent, false)
@@ -50,7 +63,7 @@ class CartAdapter(
 
         h.btnPlus.setOnClickListener {
             val pos = h.adapterPosition
-            if (pos == RecyclerView.NO_ID.toInt()) return@setOnClickListener
+            if (pos == RecyclerView.NO_ID.toInt() || pos >= items.size) return@setOnClickListener
             items[pos].qty++
             h.tvQty.text   = items[pos].qty.toString()
             h.tvPrice.text = "$${String.format("%.2f", items[pos].price * items[pos].qty)}"
@@ -59,7 +72,7 @@ class CartAdapter(
 
         h.btnMinus.setOnClickListener {
             val pos = h.adapterPosition
-            if (pos == RecyclerView.NO_ID.toInt()) return@setOnClickListener
+            if (pos == RecyclerView.NO_ID.toInt() || pos >= items.size) return@setOnClickListener
             if (items[pos].qty <= 1) {
                 onRemove(items[pos])
             } else {
@@ -72,12 +85,10 @@ class CartAdapter(
 
         h.btnRemove.setOnClickListener {
             val pos = h.adapterPosition
-            if (pos == RecyclerView.NO_ID.toInt()) return@setOnClickListener
+            if (pos == RecyclerView.NO_ID.toInt() || pos >= items.size) return@setOnClickListener
             onRemove(items[pos])
         }
     }
 
     override fun getItemCount() = items.size
-
-    fun getTotalPrice(): Double = items.sumOf { it.price * it.qty }
 }

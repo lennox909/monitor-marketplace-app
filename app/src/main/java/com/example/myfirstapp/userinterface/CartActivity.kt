@@ -17,17 +17,18 @@ class CartActivity : AppCompatActivity() {
     private lateinit var adapter: CartAdapter
     private lateinit var tvSubtotal: TextView
     private lateinit var btnCheckout: Button
+    private lateinit var tvEmpty: TextView
+    private lateinit var rvCart: RecyclerView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_cart)
 
-        db = DatabaseHelper.getInstance(this)
-
-        val rvCart    = findViewById<RecyclerView>(R.id.rvCart)
-        tvSubtotal    = findViewById(R.id.tvSubtotal)
-        btnCheckout   = findViewById(R.id.btnCheckout)
-        val tvEmpty   = findViewById<TextView>(R.id.tvEmptyCart)
+        db          = DatabaseHelper.getInstance(this)
+        rvCart      = findViewById(R.id.rvCart)
+        tvSubtotal  = findViewById(R.id.tvSubtotal)
+        btnCheckout = findViewById(R.id.btnCheckout)
+        tvEmpty     = findViewById(R.id.tvEmptyCart)
         val progress  = findViewById<ProgressBar>(R.id.progressCart)
         val bottomNav = findViewById<BottomNavigationView>(R.id.bottomNav)
 
@@ -36,18 +37,17 @@ class CartActivity : AppCompatActivity() {
         adapter = CartAdapter(
             items = mutableListOf(),
             onQtyChanged = { row, newQty ->
-                // Update subtotal immediately without reloading
+                // Update subtotal instantly — no reload
                 updateSubtotal()
-                // Save to DB in background
-                Thread {
-                    db.updateCartItemQuantity(row.cartItemId, newQty)
-                }.start()
+                Thread { db.updateCartItemQuantity(row.cartItemId, newQty) }.start()
             },
             onRemove = { row ->
-                Thread {
-                    db.removeCartItem(row.cartItemId)
-                    runOnUiThread { loadCart(rvCart, tvEmpty, progress) }
-                }.start()
+                // Remove from adapter instantly — no flicker, no reload
+                adapter.removeItemById(row.cartItemId)
+                updateSubtotal()
+                checkEmptyState()
+                // Save to DB in background
+                Thread { db.removeCartItem(row.cartItemId) }.start()
             }
         )
         rvCart.adapter = adapter
@@ -82,31 +82,24 @@ class CartActivity : AppCompatActivity() {
             }
         }
 
-        // Checkout button — check cart is not empty first
         btnCheckout.setOnClickListener {
-            if (adapter.itemCount == 0) {
+            if (adapter.isEmpty()) {
                 Toast.makeText(this, "Your cart is empty", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
             startActivity(Intent(this, CheckoutActivity::class.java))
         }
 
-        loadCart(rvCart, tvEmpty, progress)
+        loadCart(progress)
     }
 
     override fun onResume() {
         super.onResume()
-        val rvCart  = findViewById<RecyclerView>(R.id.rvCart)
-        val tvEmpty = findViewById<TextView>(R.id.tvEmptyCart)
         val progress = findViewById<ProgressBar>(R.id.progressCart)
-        loadCart(rvCart, tvEmpty, progress)
+        loadCart(progress)
     }
 
-    private fun loadCart(
-        rvCart: RecyclerView,
-        tvEmpty: TextView,
-        progress: ProgressBar
-    ) {
+    private fun loadCart(progress: ProgressBar) {
         progress.visibility = View.VISIBLE
 
         Thread {
@@ -126,26 +119,29 @@ class CartActivity : AppCompatActivity() {
 
             runOnUiThread {
                 progress.visibility = View.GONE
-
-                if (rows.isEmpty()) {
-                    tvEmpty.visibility    = View.VISIBLE
-                    rvCart.visibility     = View.GONE
-                    tvSubtotal.text       = ""
-                    btnCheckout.isEnabled = false
-                    btnCheckout.alpha     = 0.5f
-                } else {
-                    tvEmpty.visibility    = View.GONE
-                    rvCart.visibility     = View.VISIBLE
-                    btnCheckout.isEnabled = true
-                    btnCheckout.alpha     = 1.0f
-                    adapter.setData(rows)
-                    updateSubtotal()
-                }
+                adapter.setData(rows)
+                updateSubtotal()
+                checkEmptyState()
             }
         }.start()
     }
 
     private fun updateSubtotal() {
         tvSubtotal.text = "Subtotal: $${String.format("%.2f", adapter.getTotalPrice())}"
+    }
+
+    private fun checkEmptyState() {
+        if (adapter.isEmpty()) {
+            tvEmpty.visibility    = View.VISIBLE
+            rvCart.visibility     = View.GONE
+            tvSubtotal.text       = ""
+            btnCheckout.isEnabled = false
+            btnCheckout.alpha     = 0.5f
+        } else {
+            tvEmpty.visibility    = View.GONE
+            rvCart.visibility     = View.VISIBLE
+            btnCheckout.isEnabled = true
+            btnCheckout.alpha     = 1.0f
+        }
     }
 }
